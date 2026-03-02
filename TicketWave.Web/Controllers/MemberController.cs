@@ -7,7 +7,7 @@ using TicketWave.Repository.Entity;
 using TicketWave.Service.Models.Info;
 using TicketWave.Service.Services.Interface;
 using TicketWave.Web.Models.Parameter;
-using TicketWave.Service.Models.Info;
+
 
 namespace TicketWave.Web.Controllers
 {
