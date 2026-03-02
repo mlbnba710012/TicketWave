@@ -1,0 +1,286 @@
+﻿@model TicketWave.Repository.Entity.Order
+
+@{
+    ViewData["Title"] = "訂單詳情";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-shopping-cart me-2"></i> 訂單詳情</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> 返回列表
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 訂單基本資訊 -->
+        <div class="col-lg-8">
+            <!-- 訂單資訊 -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i> 訂單資訊</h5>
+                        @if (Model.OrderStatus == 0)
+                        {
+                            <span class="badge bg-warning text-dark">未付款</span>
+                        }
+                        else if (Model.OrderStatus == 1)
+                        {
+                            <span class="badge bg-success">已付款</span>
+                        }
+                        else if (Model.OrderStatus == 2)
+                        {
+                            <span class="badge bg-danger">已取消</span>
+                        }
+                        else if (Model.OrderStatus == 3)
+                        {
+                            <span class="badge bg-secondary">已退款</span>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th style="width: 150px;">訂單編號</th>
+                            <td>
+                                <strong class="font-monospace text-primary">@Model.OrderNumber</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>訂單 ID</th>
+                            <td>
+                                <small class="font-monospace">@Model.OrderId.ToString().Substring(0, 8)...</small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>演唱會名稱</th>
+                            <td><strong>@Model.ConcertName</strong></td>
+                        </tr>
+                        <tr>
+                            <th>訂單金額</th>
+                            <td>
+                                <h4 class="mb-0 text-success">$@Model.TotalAmount.ToString("N0")</h4>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>購票數量</th>
+                            <td>@Model.TicketCount 張</td>
+                        </tr>
+                        <tr>
+                            <th>訂購時間</th>
+                            <td>
+                                <i class="fas fa-clock text-muted me-2"></i>
+                                @Model.CreateDate.ToString("yyyy年MM月dd日 HH:mm:ss")
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>付款時間</th>
+                            <td>
+                                @if (Model.OrderStatus == 1)
+                                {
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    @Model.UpdateDate.ToString("yyyy年MM月dd日 HH:mm:ss")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">尚未付款</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>最後更新</th>
+                            <td>@Model.UpdateDate.ToString("yyyy/MM/dd HH:mm:ss")</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 會員資訊 -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-user me-2"></i> 會員資訊</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Member != null)
+                    {
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <th style="width: 150px;">會員姓名</th>
+                                <td><strong>@Model.Member.Name</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>
+                                    <i class="fas fa-envelope text-muted me-2"></i>
+                                    @Model.Member.Email
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>電話</th>
+                                <td>
+                                    <i class="fas fa-phone text-muted me-2"></i>
+                                    @(Model.Member.Phone ?? "-")
+                                </td>
+                            </tr>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">會員資訊不存在</p>
+                    }
+                </div>
+            </div>
+
+            <!-- 訂單明細 -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i> 訂單明細</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>座位區域</th>
+                                        <th>座位排數</th>
+                                        <th>座位號碼</th>
+                                        <th>票價</th>
+                                        <th>票券狀態</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int index = 1;
+                                    }
+                                    @foreach (var detail in Model.OrderDetails)
+                                    {
+                                        <tr>
+                                            <td>@index</td>
+                                            <td><strong>@detail.SeatZone</strong></td>
+                                            <td>@detail.SeatRow</td>
+                                            <td>@detail.SeatNumber</td>
+                                            <td>$@detail.Price.ToString("N0")</td>
+                                            <td>
+                                                @if (detail.TicketStatus == 0)
+                                                {
+                                                    <span class="badge bg-success">未使用</span>
+                                                }
+                                                else if (detail.TicketStatus == 1)
+                                                {
+                                                    <span class="badge bg-secondary">已使用</span>
+                                                }
+                                                else if (detail.TicketStatus == 2)
+                                                {
+                                                    <span class="badge bg-danger">已退票</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        index++;
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="4" class="text-end">總計</th>
+                                        <th colspan="2">$@Model.TotalAmount.ToString("N0")</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">此訂單沒有明細資料</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- 側邊欄資訊 -->
+        <div class="col-lg-4">
+            <!-- 訂單狀態卡片 -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> 訂單狀態</h5>
+                </div>
+                <div class="card-body text-center">
+                    @if (Model.OrderStatus == 0)
+                    {
+                        <div class="mb-3">
+                            <i class="fas fa-hourglass-half fa-4x text-warning"></i>
+                        </div>
+                        <h5 class="text-warning">待付款</h5>
+                        <p class="text-muted mb-0">訂單已建立，等待會員付款</p>
+                    }
+                    else if (Model.OrderStatus == 1)
+                    {
+                        <div class="mb-3">
+                            <i class="fas fa-check-circle fa-4x text-success"></i>
+                        </div>
+                        <h5 class="text-success">已付款</h5>
+                        <p class="text-muted mb-0">付款成功，票券已生效</p>
+                    }
+                    else if (Model.OrderStatus == 2)
+                    {
+                        <div class="mb-3">
+                            <i class="fas fa-times-circle fa-4x text-danger"></i>
+                        </div>
+                        <h5 class="text-danger">已取消</h5>
+                        <p class="text-muted mb-0">訂單已被取消</p>
+                    }
+                    else if (Model.OrderStatus == 3)
+                    {
+                        <div class="mb-3">
+                            <i class="fas fa-undo fa-4x text-secondary"></i>
+                        </div>
+                        <h5 class="text-secondary">已退款</h5>
+                        <p class="text-muted mb-0">訂單已完成退款</p>
+                    }
+                </div>
+            </div>
+
+            <!-- 付款資訊 -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i> 付款資訊</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted">訂單金額</td>
+                            <td class="text-end"><strong>$@Model.TotalAmount.ToString("N0")</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">購票數量</td>
+                            <td class="text-end">@Model.TicketCount 張</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">平均票價</td>
+                            <td class="text-end">
+                                $@((Model.TotalAmount / Model.TicketCount).ToString("N0"))
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作按鈕 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-list"></i> 返回訂單列表
+            </a>
+        </div>
+    </div>
+</div>

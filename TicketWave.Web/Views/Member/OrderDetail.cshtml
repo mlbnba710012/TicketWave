@@ -1,0 +1,145 @@
+@model TicketWave.Repository.Entity.Order
+@{
+    ViewData["Title"] = "訂單詳情";
+    var orderDetails = ViewBag.OrderDetails as List<TicketWave.Repository.Entity.OrderDetail>;
+}
+
+<!-- Banner Section Start-->
+<section class="banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1 class="banner-header">訂單詳情</h1>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/Index">Home</a>
+                                <a href="/Member/Orders">Orders</a>
+                                <a href="#">Detail</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Banner Section end -->
+
+<!-- Order Detail Section Start -->
+<section id="order-detail" style="padding: 60px 0;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <!-- 訂單資訊卡片 -->
+                <div class="order-info-card" style="background: white; padding: 30px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h3 style="color: #333; margin-bottom: 20px;">
+                                <i class="fa fa-music"></i> @Model.ConcertName
+                            </h3>
+                            <p style="font-size: 18px; color: #6c757d; margin-bottom: 10px;">
+                                訂單編號：<strong>@Model.OrderNumber</strong>
+                            </p>
+                            <p style="color: #6c757d;">
+                                訂購時間：@Model.CreateDate.ToString("yyyy/MM/dd HH:mm")
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            @{
+                                var statusClass = Model.OrderStatus == 1 ? "success" : 
+                                                Model.OrderStatus == 0 ? "warning" : 
+                                                Model.OrderStatus == 2 ? "secondary" : "danger";
+                                var statusText = Model.OrderStatus == 1 ? "已付款" : 
+                                               Model.OrderStatus == 0 ? "待付款" : 
+                                               Model.OrderStatus == 2 ? "已取消" : "已退款";
+                            }
+                            <span class="badge badge-@statusClass" style="font-size: 18px; padding: 12px 20px;">
+                                @statusText
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 座位明細 -->
+                <div class="seats-detail-card" style="background: white; padding: 30px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                    <h4 style="margin-bottom: 25px; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+                        <i class="fa fa-ticket"></i> 座位明細
+                    </h4>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead style="background-color: #f8f9fa;">
+                                <tr>
+                                    <th style="width: 15%;">區域</th>
+                                    <th style="width: 15%;">排</th>
+                                    <th style="width: 15%;">號</th>
+                                    <th style="width: 20%;">票價</th>
+                                    <th style="width: 20%;">狀態</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (orderDetails != null && orderDetails.Any())
+                                {
+                                    foreach (var detail in orderDetails)
+                                    {
+                                        var ticketStatusText = detail.TicketStatus == 0 ? "未使用" : 
+                                                             detail.TicketStatus == 1 ? "已使用" : "已退票";
+                                        var ticketStatusClass = detail.TicketStatus == 0 ? "info" : 
+                                                              detail.TicketStatus == 1 ? "success" : "secondary";
+                                        
+                                        <tr>
+                                            <td><strong>@detail.SeatZone</strong></td>
+                                            <td>@detail.SeatRow 排</td>
+                                            <td>@detail.SeatNumber 號</td>
+                                            <td><strong style="color: #28a745;">NT$ @detail.Price.ToString("N0")</strong></td>
+                                            <td>
+                                                <span class="badge badge-@ticketStatusClass">@ticketStatusText</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                            <tfoot style="background-color: #f8f9fa;">
+                                <tr>
+                                    <td colspan="3" class="text-right"><strong>總計</strong></td>
+                                    <td colspan="2">
+                                        <strong style="color: #28a745; font-size: 20px;">
+                                            NT$ @Model.TotalAmount.ToString("N0")
+                                        </strong>
+                                        <span style="color: #6c757d; margin-left: 10px;">
+                                            （@Model.TicketCount 張票）
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 操作按鈕 -->
+                <div class="action-buttons text-center">
+                    <a href="/Member/Orders" class="btn btn-outline-secondary" style="padding: 10px 30px;">
+                        <i class="fa fa-arrow-left"></i> 返回訂單列表
+                    </a>
+                    @if (Model.OrderStatus == 0)
+                    {
+                        <a href="#" class="btn btn-warning" style="padding: 10px 30px;">
+                            <i class="fa fa-credit-card"></i> 前往付款
+                        </a>
+                    }
+                    @if (Model.OrderStatus == 1)
+                    {
+                        <button class="btn btn-success" style="padding: 10px 30px;" onclick="window.print()">
+                            <i class="fa fa-print"></i> 列印訂單
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Order Detail Section End -->

@@ -1,0 +1,262 @@
+﻿@model TicketWave.Repository.Entity.Concert
+
+@{
+    ViewData["Title"] = "演唱會詳情";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-music me-2"></i> 演唱會詳情</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Edit" asp-route-id="@Model.ConcertId" class="btn btn-warning">
+                <i class="fas fa-edit"></i> 編輯
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> 返回列表
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 基本資訊 -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> 基本資訊</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th style="width: 150px;">演唱會名稱</th>
+                            <td><strong class="text-primary">@Model.ConcertName</strong></td>
+                        </tr>
+                        <tr>
+                            <th>藝人/樂團</th>
+                            <td>@Model.ArtistName</td>
+                        </tr>
+                        <tr>
+                            <th>演出日期時間</th>
+                            <td>
+                                <i class="fas fa-calendar-alt text-muted me-2"></i>
+                                @Model.PerformanceDate.ToString("yyyy年MM月dd日 HH:mm")
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>場館名稱</th>
+                            <td>@Model.VenueName</td>
+                        </tr>
+                        <tr>
+                            <th>場館地址</th>
+                            <td>
+                                <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                @Model.VenueAddress
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>演唱會狀態</th>
+                            <td>
+                                @switch (Model.Status)
+                                {
+                                    case 0:
+                                        <span class="badge bg-secondary">未開賣</span>
+                                        break;
+                                    case 1:
+                                        <span class="badge bg-success">售票中</span>
+                                        break;
+                                    case 2:
+                                        <span class="badge bg-danger">已售罄</span>
+                                        break;
+                                    case 3:
+                                        <span class="badge bg-dark">已結束</span>
+                                        break;
+                                    case 4:
+                                        <span class="badge bg-warning">已取消</span>
+                                        break;
+                                }
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 售票資訊 -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-ticket-alt me-2"></i> 售票資訊</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th style="width: 150px;">開始售票時間</th>
+                            <td>
+                                <i class="fas fa-clock text-success me-2"></i>
+                                @Model.SaleStartDate.ToString("yyyy/MM/dd HH:mm")
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>結束售票時間</th>
+                            <td>
+                                <i class="fas fa-clock text-danger me-2"></i>
+                                @Model.SaleEndDate.ToString("yyyy/MM/dd HH:mm")
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 演唱會描述 -->
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div class="card mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-align-left me-2"></i> 演唱會描述</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">@Model.Description</p>
+                    </div>
+                </div>
+            }
+
+            <!-- 海報圖片 -->
+            @if (!string.IsNullOrEmpty(Model.PosterImageUrl))
+            {
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-image me-2"></i> 演唱會海報</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="@Model.PosterImageUrl" alt="@Model.ConcertName" class="img-fluid" style="max-height: 500px;">
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- 統計資訊 -->
+        <div class="col-lg-4">
+            <!-- 座位統計 -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-chair me-2"></i> 座位統計</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>總座位數</span>
+                            <strong class="text-primary">@ViewBag.TotalSeats</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>
+                                <i class="fas fa-check-circle text-success"></i> 可購買
+                            </span>
+                            <strong class="text-success">@ViewBag.AvailableSeats</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>
+                                <i class="fas fa-shopping-cart text-danger"></i> 已售出
+                            </span>
+                            <strong class="text-danger">@ViewBag.SoldSeats</strong>
+                        </div>
+                        @if (ViewBag.ReservedSeats > 0)
+                        {
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>
+                                    <i class="fas fa-lock text-warning"></i> 保留中
+                                </span>
+                                <strong class="text-warning">@ViewBag.ReservedSeats</strong>
+                            </div>
+                        }
+                        @if (ViewBag.LockedSeats > 0)
+                        {
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>
+                                    <i class="fas fa-ban text-secondary"></i> 已鎖定
+                                </span>
+                                <strong class="text-secondary">@ViewBag.LockedSeats</strong>
+                            </div>
+                        }
+                    </div>
+
+                    <hr>
+
+                    <!-- 售票進度條 -->
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small>售出進度</small>
+                            <small><strong>@ViewBag.SoldPercentage.ToString("F1")%</strong></small>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success"
+                                 role="progressbar"
+                                 style="width: @ViewBag.SoldPercentage.ToString("F1")%"
+                                 aria-valuenow="@ViewBag.SoldPercentage"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                                @ViewBag.SoldPercentage.ToString("F1")%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 訂單統計 -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i> 訂單統計</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <span>訂單總數</span>
+                        <strong class="text-primary">@ViewBag.OrderCount 筆</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系統資訊 -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-cog me-2"></i> 系統資訊</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted">演唱會 ID</td>
+                            <td class="text-end">
+                                <small class="font-monospace">@Model.ConcertId.ToString().Substring(0, 8)...</small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">建立時間</td>
+                            <td class="text-end">
+                                <small>@Model.CreateDate.ToString("yyyy/MM/dd HH:mm")</small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">最後更新</td>
+                            <td class="text-end">
+                                <small>@Model.UpdateDate.ToString("yyyy/MM/dd HH:mm")</small>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作按鈕 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <a asp-action="Edit" asp-route-id="@Model.ConcertId" class="btn btn-warning">
+                <i class="fas fa-edit"></i> 編輯演唱會
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.ConcertId" class="btn btn-danger">
+                <i class="fas fa-trash"></i> 刪除演唱會
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-list"></i> 返回列表
+            </a>
+        </div>
+    </div>
+</div>
+

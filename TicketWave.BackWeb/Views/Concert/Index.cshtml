@@ -1,0 +1,87 @@
+﻿@model IEnumerable<TicketWave.Repository.Entity.Concert>
+
+@{
+    ViewData["Title"] = "演唱會管理";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2><i class="fas fa-music me-2"></i> 演唱會管理</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> 新增演唱會
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">演唱會列表</h5>
+            <span class="badge bg-primary">共 @Model.Count() 場演唱會</span>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>演唱會名稱</th>
+                                <th>藝人</th>
+                                <th>演出日期</th>
+                                <th>地點</th>
+                                <th>總座位數</th>
+                                <th>剩餘座位</th>
+                                @* <th>票價</th> *@
+                                <th style="width: 200px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var concert in Model)
+                            {
+                                var soldSeats = concert.TotalSeats - concert.AvailableSeats;
+                                var soldPercentage = concert.TotalSeats > 0 ? (soldSeats * 100.0 / concert.TotalSeats) : 0;
+
+                                <tr>
+                                    <td><strong>@concert.ConcertName</strong></td>
+                                    <td>@concert.ArtistName</td>
+                                    <td>@concert.PerformanceDate.ToString("yyyy/MM/dd HH:mm")</td>
+                                    <td>@concert.VenueName</td>
+                                    <td>@concert.TotalSeats</td>
+                                    <td>
+                                        @concert.AvailableSeats
+                                        <small class="text-muted">(@soldPercentage.ToString("F1")% 已售)</small>
+                                    </td>
+                                    @* <td>無票價資訊</td> *@
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@concert.ConcertId" class="btn btn-sm btn-info" title="詳情">
+                                            <i class="fas fa-eye"></i> 詳情
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@concert.ConcertId" class="btn btn-sm btn-warning" title="編輯">
+                                            <i class="fas fa-edit"></i> 編輯
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@concert.ConcertId" class="btn btn-sm btn-danger" title="刪除">
+                                            <i class="fas fa-trash"></i> 刪除
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-music fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-3">目前沒有演唱會</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> 新增第一場演唱會
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

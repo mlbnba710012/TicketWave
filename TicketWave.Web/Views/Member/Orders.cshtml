@@ -1,0 +1,240 @@
+@model List<TicketWave.Repository.Entity.Order>
+@{
+    ViewData["Title"] = "我的訂單";
+}
+
+<!-- Banner Section Start-->
+<section class="banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1 class="banner-header">我的訂單</h1>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/Index">Home</a>
+                                <a href="/Member/Orders">Orders</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Banner Section end -->
+
+<!-- Orders Section Start -->
+<section id="orders" style="padding: 60px 0;">
+    <div class="container">
+        <div class="row">
+            <!-- 左側選單 -->
+            <div class="col-md-3">
+                <div class="profile-menu" style="background: #f8f9fa; padding: 20px; border-radius: 5px;">
+                    <h4 style="margin-bottom: 20px;">會員中心</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 10px;">
+                            <a href="/Member/Profile" style="color: #333;">
+                                <i class="fa fa-user"></i> 個人資料
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            <a href="/Member/Orders" style="color: #007bff; font-weight: bold;">
+                                <i class="fa fa-shopping-cart"></i> 我的訂單
+                            </a>
+                        </li>
+                        <li>
+                            <form asp-controller="Member" asp-action="Logout" method="post" style="margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 0;">
+                                    <i class="fa fa-sign-out"></i> 登出
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 右側內容 -->
+            <div class="col-md-9">
+                <div class="orders-content" style="background: white; padding: 30px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 30px; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+                        訂單記錄
+                    </h3>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fa fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    }
+
+
+
+
+                    @if (Model == null || !Model.Any())
+                    {
+                        <div class="alert alert-info text-center" style="padding: 40px;">
+                            <i class="fa fa-inbox" style="font-size: 48px; color: #17a2b8; margin-bottom: 20px;"></i>
+                            <h4>尚無訂單記錄</h4>
+                            <p>您還沒有購買任何票券</p>
+                            <a href="/Home/Concerts" class="btn btn-primary" style="margin-top: 20px;">
+                                <i class="fa fa-ticket"></i> 立即購票
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var order in Model)
+                        {
+                            var statusClass = order.OrderStatus == 1 ? "success" : 
+                                            order.OrderStatus == 0 ? "warning" : 
+                                            order.OrderStatus == 2 ? "secondary" : "danger";
+                            var statusText = order.OrderStatus == 1 ? "已付款" : 
+                                           order.OrderStatus == 0 ? "待付款" : 
+                                           order.OrderStatus == 2 ? "已取消" : "已退款";
+
+                            <div class="order-card" style="border: 1px solid #dee2e6; border-radius: 5px; margin-bottom: 20px; overflow: hidden;">
+                                <!-- 訂單標題 -->
+                                <div class="order-header" style="background: #f8f9fa; padding: 15px 20px; border-bottom: 1px solid #dee2e6;">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h5 style="margin: 0; color: #333;">
+                                                <i class="fa fa-ticket"></i> @order.ConcertName
+                                            </h5>
+                                            <small style="color: #6c757d;">
+                                                訂單編號：@order.OrderNumber
+                                            </small>
+                                        </div>
+                                        <div class="col-md-4 text-right">
+                                            <span class="badge badge-@statusClass" style="font-size: 14px; padding: 8px 15px;">
+                                                @statusText
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 訂單內容 -->
+                                <div class="order-body" style="padding: 20px;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p style="margin-bottom: 10px;">
+                                                <i class="fa fa-calendar" style="color: #007bff; width: 20px;"></i>
+                                                <strong>訂購時間：</strong>
+                                                @order.CreateDate.ToString("yyyy/MM/dd HH:mm")
+                                            </p>
+                                            <p style="margin-bottom: 10px;">
+                                                <i class="fa fa-ticket" style="color: #007bff; width: 20px;"></i>
+                                                <strong>票券數量：</strong>
+                                                @order.TicketCount 張
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p style="margin-bottom: 10px;">
+                                                <i class="fa fa-money" style="color: #28a745; width: 20px;"></i>
+                                                <strong>訂單金額：</strong>
+                                                <span style="color: #28a745; font-size: 20px; font-weight: bold;">
+                                                    NT$ @order.TotalAmount.ToString("N0")
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- 操作按鈕 -->
+                                    <div class="order-actions" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                                        <a href="/Member/OrderDetail?orderId=@order.OrderId" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-eye"></i> 查看詳情
+                                        </a>
+
+
+                                        @if (order.OrderStatus == 0)
+                                        {
+                                            <!-- 待付款：可以重新選座或取消 -->
+                                            <form asp-action="ReSelectSeats" asp-controller="Member" method="post" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="orderId" value="@order.OrderId" />
+                                                <button type="submit" class="btn btn-sm btn-info"
+                                                        onclick="return confirm('確定要重新選座嗎？原訂單將被取消。')">
+                                                    <i class="fa fa-refresh"></i> 重新選座
+                                                </button>
+                                            </form>
+
+                                            <button class="btn btn-sm btn-danger"
+                                                    onclick="cancelOrder('@order.OrderId')">
+                                                <i class="fa fa-times"></i> 取消訂單
+                                            </button>
+                                        }
+
+
+
+                                        @if (order.OrderStatus == 1)
+                                        {
+                                            <button class="btn btn-sm btn-outline-success" disabled>
+                                                <i class="fa fa-check"></i> 已完成付款
+                                            </button>
+                                        }
+
+                                        @if (order.OrderStatus == 2)
+                                        {
+                                            <span class="badge badge-secondary">已取消</span>
+                                        }
+
+                                     
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Orders Section End -->
+@section MyJS {
+    <script>
+        function cancelOrder(orderId) {
+            if (!confirm('確定要取消此訂單嗎？取消後座位將被釋放，其他人可以購買。')) {
+                return;
+            }
+
+            // 建立表單並提交
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Member/CancelOrder';
+
+            // 加入 AntiForgeryToken
+            var token = document.createElement('input');
+            token.type = 'hidden';
+            token.name = '__RequestVerificationToken';
+            token.value = '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)[1];
+            form.appendChild(token);
+
+            // 加入 orderId
+            var orderIdInput = document.createElement('input');
+            orderIdInput.type = 'hidden';
+            orderIdInput.name = 'orderId';
+            orderIdInput.value = orderId;
+            form.appendChild(orderIdInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+}

@@ -1,0 +1,146 @@
+﻿@model TicketWave.Web.Models.Parameter.RegisterParameter
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<!-- Banner Section Start-->
+<section class="banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1 class="banner-header">
+                            註冊會員
+                        </h1>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/Index">Home</a>
+                                <a href="/Member/Login">User Area</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Banner Section end -->
+<!-- Login Section Start -->
+<section id="login">
+    <div class="container">
+        <div class="section-header">
+            <h3>註冊會員</h3>
+        </div>
+        <div class="row">
+            <div class="col-md-3 form"></div>
+            <div class="col-md-6 form">
+                <form asp-action="Register" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <!-- 顯示錯誤訊息 -->
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div style="color:red; background-color: #ffebee; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                            <p style="margin: 5px 0;"><strong>⚠️ @TempData["ErrorMessage"]</strong></p>
+                        </div>
+                    }
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div style="color: green; background-color: #e8f5e9; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                            <p style="margin: 5px 0;"><strong>✓ @TempData["SuccessMessage"]</strong></p>
+                        </div>
+                    }
+
+                    <!-- 顯示 ModelState 錯誤 -->
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div style="color:red; background-color: #ffebee; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                            @foreach (var modelState in ViewData.ModelState.Values)
+                            {
+                                foreach (var error in modelState.Errors)
+                                {
+                                    <p style="margin: 5px 0;"><strong>⚠️ @error.ErrorMessage</strong></p>
+                                }
+                            }
+                        </div>
+                    }
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <input type="text" asp-for="NationalID" class="form-control" placeholder="身分證字號" />
+                            <span asp-validation-for="NationalID" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <input type="email" asp-for="Email" class="form-control" placeholder="Your Email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+
+                        </div>
+                        <div class="form-group col-md-12">
+                            <input type="text" asp-for="Phone" class="form-control" placeholder="Your Phone" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+
+                        </div>
+                        <div class="form-group col-md-12">
+                            <input type="password" asp-for="Password" class="form-control" placeholder="Your Password(至少6碼)" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+
+                        </div>
+                        <div class="form-group col-md-12">
+                            <input type="Password" asp-for="ConfirmPassword" class="form-control" placeholder="Repeat Your Password" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <button type="submit">Sign Up</button>
+                         </div>
+                        <div class="form-group col-md-12 text-center">
+                            <p>已經有帳號了？ <a href="/Member/Login">立即登入</a></p>
+                        </div>
+
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+                        {
+                            <div style="color:red; background-color: #ffebee; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                                @foreach (var error in ViewData.ModelState[""].Errors)
+                                {
+                                    <p style="margin: 5px 0;"><strong>⚠️ @error.ErrorMessage</strong></p>
+                                }
+                            </div>
+                        }
+                    </div>
+                    
+                    @* <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="remember1">
+                            <label class="custom-control-label" for="remember1">Remember me</label>
+                        </div>
+                    </div> *@
+                    @* <div><button type="submit">Sing Up</button></div> *@
+                </form>
+                <div class="col-md-3 form"></div>
+            </div>
+
+            @* <div class="col-md-6 form">
+                <form>
+                    <div class="form-group">
+                        <input type="email" class="form-control" placeholder="Your Email" />
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" placeholder="Your Password" />
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="remember2">
+                            <label class="custom-control-label" for="remember2">Remember me</label>
+                        </div>
+                    </div>
+                    <div><button type="submit">Sign In</button></div>
+                </form>
+            </div> *@
+        </div>
+    </div>
+</section>
+<!-- Login Section end -->

@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Common/Common.csproj" />
+  <Project Path="TicketWave.BackWeb/TicketWave.BackWeb.csproj" Id="0454cce5-55f3-4d90-8c5f-d569fe0aa19f" />
+  <Project Path="TicketWave.Repository/TicketWave.Repository.csproj" />
+  <Project Path="TicketWave.Service/TicketWave.Service.csproj" />
+  <Project Path="TicketWave.Web/TicketWave.Web.csproj" />
+</Solution>

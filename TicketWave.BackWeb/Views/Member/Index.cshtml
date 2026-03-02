@@ -1,0 +1,92 @@
+﻿@model IEnumerable<TicketWave.Repository.Entity.Member>
+
+@{
+    ViewData["Title"] = "會員管理";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-users me-2"></i> 會員管理</h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-white">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0">會員列表</h5>
+                </div>
+                <div class="col-md-6">
+                    <form method="get" class="d-flex">
+                        <input type="text"
+                               name="searchTerm"
+                               class="form-control me-2"
+                               placeholder="搜尋姓名、Email、電話、身分證..."
+                               value="@ViewBag.SearchTerm">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> 搜尋
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>Email</th>
+                                <th>電話</th>
+                                <th>身分證字號</th>
+                                <th>註冊日期</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var member in Model)
+                            {
+                                <tr>
+                                    <td><strong>@member.Name</strong></td>
+                                    <td>@member.Email</td>
+                                    <td>@(member.Phone ?? "-")</td>
+                                    <td>@(member.NationalID ?? "-")</td>
+                                    @* <td>@member.RegisterDate.ToString("yyyy/MM/dd")</td> *@
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@member.MemberId" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> 詳情
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3">
+                    <p class="text-muted">共 @Model.Count() 位會員</p>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">
+                        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+                        {
+                            <text>找不到符合「@ViewBag.SearchTerm」的會員</text>
+                        }
+                        else
+                        {
+                            <text>目前沒有會員</text>
+                        }
+                    </p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,209 @@
+﻿@{
+    ViewData["Title"] = "儀表板";
+}
+
+<div class="container-fluid">
+    <!-- 歡迎訊息 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-0">
+                <i class="fas fa-tachometer-alt me-2"></i> 儀表板
+            </h2>
+            <p class="text-muted">歡迎回來，@Context.Session.GetString("AdminUsername")！</p>
+        </div>
+    </div>
+
+    <!-- 統計卡片 -->
+    <div class="row g-3 mb-4">
+        <!-- 會員總數 -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 opacity-75">會員總數</h6>
+                        <h2 class="mb-0">@ViewBag.TotalMembers</h2>
+                    </div>
+                    <div>
+                        <i class="fas fa-users fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 演唱會總數 -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 opacity-75">演唱會總數</h6>
+                        <h2 class="mb-0">@ViewBag.TotalConcerts</h2>
+                    </div>
+                    <div>
+                        <i class="fas fa-music fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 訂單總數 -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 opacity-75">訂單總數</h6>
+                        <h2 class="mb-0">@ViewBag.TotalOrders</h2>
+                    </div>
+                    <div>
+                        <i class="fas fa-shopping-cart fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 總營收 -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card info">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 opacity-75">總營收</h6>
+                        <h2 class="mb-0">$@ViewBag.TotalRevenue.ToString("N0")</h2>
+                    </div>
+                    <div>
+                        <i class="fas fa-dollar-sign fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 今日統計 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-day me-2"></i> 今日統計
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="fas fa-shopping-cart text-primary me-2"></i>
+                                <strong>今日訂單：</strong> @ViewBag.TodayOrders 筆
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="fas fa-dollar-sign text-success me-2"></i>
+                                <strong>今日營收：</strong> $@ViewBag.TodayRevenue.ToString("N0")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最新訂單 -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i> 最新訂單（前 10 筆）
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.RecentOrders != null && ((IEnumerable<dynamic>)ViewBag.RecentOrders).Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>訂單編號</th>
+                                        <th>會員</th>
+                                        <th>金額</th>
+                                        <th>狀態</th>
+                                        <th>訂購時間</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in ViewBag.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td><small>@order.OrderId.ToString().Substring(0, 8)</small></td>
+                                            <td>@order.Member?.Name</td>
+                                            <td>$@order.TotalAmount.ToString("N0")</td>
+                                            <td>
+                                                @if (order.OrderStatus == 0)
+                                                {
+                                                    <span class="badge bg-warning">未付款</span>
+                                                }
+                                                else if (order.OrderStatus == 1)
+                                                {
+                                                    <span class="badge bg-success">已付款</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">已取消</span>
+                                                }
+                                            </td>
+                                            <td><small>@order.CreateDate.ToString("yyyy/MM/dd HH:mm")</small></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">目前沒有訂單</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- 熱門演唱會 -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-fire me-2"></i> 熱門演唱會（前 5 名）
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.PopularConcerts != null && ((IEnumerable<dynamic>)ViewBag.PopularConcerts).Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var concert in ViewBag.PopularConcerts)
+                            {
+                                var soldSeats = concert.TotalSeats - concert.AvailableSeats;
+                                var soldPercentage = concert.TotalSeats > 0 ? (soldSeats * 100.0 / concert.TotalSeats) : 0;
+
+                                <div class="list-group-item px-0">
+                                    <h6 class="mb-1">@concert.ConcertName</h6>
+                                    <small class="text-muted d-block mb-2">@concert.ArtistName</small>
+                                    <div class="progress" style="height: 5px;">
+                                        <div class="progress-bar"
+                                             role="progressbar"
+                                             style="width: @soldPercentage.ToString("F1")%"
+                                             aria-valuenow="@soldPercentage"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">已售 @soldPercentage.ToString("F1")%</small>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">目前沒有演唱會</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

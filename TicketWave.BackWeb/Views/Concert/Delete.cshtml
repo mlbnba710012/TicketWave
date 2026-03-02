@@ -1,0 +1,109 @@
+﻿@model TicketWave.Repository.Entity.Concert
+
+@{
+    ViewData["Title"] = "刪除演唱會";
+    var hasOrders = ViewBag.HasOrders as bool? ?? false;
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-trash me-2"></i> 刪除演唱會</h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            @if (hasOrders)
+            {
+                <div class="alert alert-danger">
+                    <h5 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle"></i> 無法刪除此演唱會
+                    </h5>
+                    <p class="mb-0">此演唱會已有訂單記錄，無法刪除。請考慮將演唱會狀態設為「已取消」。</p>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <h5 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle"></i> 確認刪除
+                    </h5>
+                    <p class="mb-0">您確定要刪除以下演唱會嗎？此操作無法復原。</p>
+                </div>
+            }
+
+            <div class="table-responsive mt-4">
+                <table class="table">
+                    <tr>
+                        <th style="width: 200px;">演唱會名稱</th>
+                        <td>@Model.ConcertName</td>
+                    </tr>
+                    <tr>
+                        <th>藝人/樂團</th>
+                        <td>@Model.ArtistName</td>
+                    </tr>
+                    <tr>
+                        <th>演出日期</th>
+                        <td>@Model.PerformanceDate.ToString("yyyy/MM/dd HH:mm")</td>
+                    </tr>
+                    <tr>
+                        <th>場館</th>
+                        <td>@Model.VenueName (@Model.VenueAddress)</td>
+                    </tr>
+                    <tr>
+                        <th>總座位數</th>
+                        <td>@Model.TotalSeats</td>
+                    </tr>
+                    <tr>
+                        <th>剩餘座位</th>
+                        <td>@Model.AvailableSeats</td>
+                    </tr>
+                    <tr>
+                        <th>已售票數</th>
+                        <td>@(Model.TotalSeats - Model.AvailableSeats)</td>
+                    </tr>
+                    <tr>
+                        <th>狀態</th>
+                        <td>
+                            @switch (Model.Status)
+                            {
+                                case 0:
+                                    <span class="badge bg-secondary">未開賣</span>
+                                    break;
+                                case 1:
+                                    <span class="badge bg-success">售票中</span>
+                                    break;
+                                case 2:
+                                    <span class="badge bg-danger">已售罄</span>
+                                    break;
+                                case 3:
+                                    <span class="badge bg-dark">已結束</span>
+                                    break;
+                                case 4:
+                                    <span class="badge bg-warning">已取消</span>
+                                    break;
+                            }
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="mt-4">
+                @if (!hasOrders)
+                {
+                    <form asp-action="Delete" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ConcertId" />
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('確定要刪除此演唱會嗎？');">
+                            <i class="fas fa-trash"></i> 確認刪除
+                        </button>
+                    </form>
+                }
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回列表
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

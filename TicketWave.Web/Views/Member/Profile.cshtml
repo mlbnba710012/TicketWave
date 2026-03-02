@@ -1,0 +1,232 @@
+@model TicketWave.Repository.Entity.Member
+@{
+    ViewData["Title"] = "個人資料";
+}
+
+<!-- Banner Section Start-->
+<section class="banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1 class="banner-header">個人資料</h1>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/Index">Home</a>
+                                <a href="/Member/Profile">Profile</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Banner Section end -->
+
+<!-- Profile Section Start -->
+<section id="profile" style="padding: 60px 0;">
+    <div class="container">
+        <div class="row">
+            <!-- 左側選單 -->
+            <div class="col-md-3">
+                <div class="profile-menu" style="background: #f8f9fa; padding: 20px; border-radius: 5px;">
+                    <h4 style="margin-bottom: 20px;">會員中心</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 10px;">
+                            <a href="/Member/Profile" style="color: #007bff; font-weight: bold;">
+                                <i class="fa fa-user"></i> 個人資料
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            <a href="/Member/Orders" style="color: #333;">
+                                <i class="fa fa-shopping-cart"></i> 我的訂單
+                            </a>
+                        </li>
+                        <li>
+                            <form asp-controller="Member" asp-action="Logout" method="post" style="margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 0;">
+                                    <i class="fa fa-sign-out"></i> 登出
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 右側內容 -->
+            <div class="col-md-9">
+                <div class="profile-content" style="background: white; padding: 30px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 30px; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+                        編輯個人資料
+                    </h3>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fa fa-check-circle"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fa fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    }
+
+                    <form asp-action="UpdateProfile" asp-controller="Member" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="MemberId" />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>姓名 <span style="color: red;">*</span></label>
+                                    <input type="text" class="form-control" asp-for="Name" required />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>身分證字號 <span style="color: red;">*</span></label>
+                                    <input type="text" class="form-control" asp-for="NationalID" readonly 
+                                           style="background-color: #e9ecef;" title="身分證字號無法修改" />
+                                    <small class="form-text text-muted">身分證字號無法修改</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>電話 <span style="color: red;">*</span></label>
+                                    <input type="tel" class="form-control" asp-for="Phone" required />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Email <span style="color: red;">*</span></label>
+                                    <input type="email" class="form-control" asp-for="Email" readonly 
+                                           style="background-color: #e9ecef;" title="Email 無法修改" />
+                                    <small class="form-text text-muted">Email 無法修改</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>生日</label>
+                                    <input type="text" class="form-control" asp-for="BirthDate" 
+                                           placeholder="YYYY-MM-DD" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>地址</label>
+                                    <input type="text" class="form-control" asp-for="Address" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary" style="padding: 10px 30px;">
+                                <i class="fa fa-save"></i> 儲存變更
+                            </button>
+                            <a href="/Member/ChangePassword" class="btn btn-outline-secondary" style="padding: 10px 30px;">
+                                <i class="fa fa-key"></i> 修改密碼
+                            </a>
+                        </div>
+                    </form>
+                    <!-- 刪除帳號區域 -->
+                    <hr style="margin: 40px 0;">
+
+                    <div class="danger-zone" style="background: #fff5f5; padding: 20px; border-radius: 5px; border: 1px solid #ffcccc;">
+                        <h4 style="color: #dc3545; margin-bottom: 15px;">
+                            <i class="fa fa-exclamation-triangle"></i> 注意
+                        </h4>
+                        <p style="color: #666; margin-bottom: 15px;">
+                            刪除帳號後，您的所有資料將被永久刪除且無法復原。
+                        </p>
+                        <button type="button"
+                                class="btn btn-danger"
+                                onclick="showDeleteConfirm()"
+                                style="padding: 10px 30px;">
+                            <i class="fa fa-trash"></i> 刪除我的帳號
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Profile Section End -->
+<!-- 刪除帳號確認 Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #dc3545; color: white;">
+                <h5 class="modal-title">
+                    <i class="fa fa-exclamation-triangle"></i> 確認刪除帳號
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" style="color: white;">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form asp-action="DeleteAccount" asp-controller="Member" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <strong>⚠️ 警告</strong><br>
+                        此操作無法復原！刪除後您將失去：
+                        <ul style="margin-top: 10px;">
+                            <li>所有個人資料</li>
+                            <li>購票記錄</li>
+                            <li>訂單資訊</li>
+                        </ul>
+                    </div>
+
+                    <div class="form-group">
+                        <label>請輸入您的密碼以確認刪除：</label>
+                        <input type="password"
+                               name="password"
+                               class="form-control"
+                               placeholder="輸入密碼"
+                               required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        取消
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa fa-trash"></i> 確認刪除
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section MyJS {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        function showDeleteConfirm() {
+            $('#deleteAccountModal').modal('show');
+        }
+    </script>
+}

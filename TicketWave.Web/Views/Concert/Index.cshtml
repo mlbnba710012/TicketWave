@@ -1,0 +1,134 @@
+﻿@model List<TicketWave.Repository.Entity.Concert>
+@{
+    ViewData["Title"] = "Concerts";
+}
+
+<!-- Banner Section Start-->
+<section class="banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1 class="banner-header">
+                            Concerts
+                        </h1>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/index">Home</a>
+                                <a href="/Home/Concerts">Concerts</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Banner Section end -->
+<!-- About Section Start-->
+<section id="about">
+    <div class="container">
+        <header class="section-header">
+            <h3>Concerts</h3>
+        </header>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info text-center">
+                <h4>目前沒有演唱會資訊</h4>
+                <p>請稍後再回來查看</p>
+            </div>
+        }
+        else
+        {
+            @* 第一場演唱會（大圖） *@
+            @if (Model.Count > 0)
+            {
+                var firstConcert = Model[0];
+                <div class="row">
+                    <div class="col-md-4 about-col-1">
+                        <div class="about-title">
+                            <h1>
+                                Welcome to @firstConcert.ConcertName
+                            </h1>
+                            @* <a href="~/Concert/SelectSeats?concertId=@firstConcert.ConcertId">
+                                Buy Tickets
+                            </a> *@
+                            <a asp-controller="Concert"
+                               asp-action="SelectSeats"
+                               asp-route-concertId="@firstConcert.ConcertId">
+                                Buy Tickets
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-8 about-col-2">
+                        <div class="about-imgs">
+                            <div class="about-img">
+                                @if (!string.IsNullOrEmpty(firstConcert.PosterImageUrl))
+                                {
+                                    <img class="img-fluid" src="@firstConcert.PosterImageUrl" alt="@firstConcert.ConcertName" />
+                                }
+                                else
+                                {
+                                    <img class="img-fluid" src="~/img/concert-1.png" alt="@firstConcert.ConcertName" />
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    @* 其他演唱會（兩欄） *@
+                    <div class="col-md-12 about-des">
+                        <div class="row">
+                            @for (int i = 1; i < Model.Count && i < 3; i++)
+                            {
+                                var concert = Model[i];
+                                var imagePath = $"~/img/concert-{i + 1}.png";
+
+                                <div class="col-md-6">
+                                    <div class="about-des-col">
+                                        <div class="about-img">
+                                            @if (!string.IsNullOrEmpty(concert.PosterImageUrl))
+                                            {
+                                                <img class="img-fluid" src="@concert.PosterImageUrl" alt="@concert.ConcertName" />
+                                            }
+                                            else
+                                            {
+                                                <img class="img-fluid" src="@imagePath" alt="@concert.ConcertName" />
+                                            }
+                                        </div>
+                                        <p>
+                                            <strong>@concert.ConcertName</strong>
+                                            <br />
+                                            @if (!string.IsNullOrEmpty(concert.Description))
+                                            {
+                                                @concert.Description
+                                                <br />
+                                            }
+                                            <i class="fas fa-microphone"></i> 藝人：@concert.ArtistName
+                                            <br />
+                                            <i class="fas fa-calendar"></i> 時間：@concert.PerformanceDate.ToString("yyyy/MM/dd HH:mm")
+                                            <br />
+                                            <i class="fas fa-map-marker-alt"></i> 地點：@concert.VenueName
+                                        </p>
+                                        @* <a href="~/Concert/SelectSeats?concertId=@concert.ConcertId">
+                                            Buy Tickets
+                                        </a> *@
+                                        <a asp-controller="Concert"
+                                           asp-action="SelectSeats"
+                                           asp-route-concertId="@concert.ConcertId">
+                                            Buy Tickets
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>
+<!-- About Section end -->

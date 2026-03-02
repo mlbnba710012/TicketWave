@@ -1,0 +1,121 @@
+﻿@model IEnumerable<TicketWave.Repository.Entity.Order>
+
+@{
+    ViewData["Title"] = "訂單管理";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-shopping-cart me-2"></i> 訂單管理</h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-white">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <h5 class="mb-0">訂單列表</h5>
+                </div>
+                <div class="col-md-8">
+                    <form method="get" class="row g-2">
+                        <div class="col-md-6">
+                            <input type="text"
+                                   name="searchTerm"
+                                   class="form-control"
+                                   placeholder="搜尋訂單編號、會員姓名或Email..."
+                                   value="@ViewBag.SearchTerm">
+                        </div>
+                        <div class="col-md-4">
+                            <select name="status" class="form-select">
+                                <option value="">全部狀態</option>
+                                <option value="0" selected="@(ViewBag.SelectedStatus == 0)">未付款</option>
+                                <option value="1" selected="@(ViewBag.SelectedStatus == 1)">已付款</option>
+                                <option value="2" selected="@(ViewBag.SelectedStatus == 2)">已取消</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i> 搜尋
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>訂單編號</th>
+                                <th>會員</th>
+                                <th>訂單金額</th>
+                                <th>訂購時間</th>
+                                <th>付款時間</th>
+                                <th>狀態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td><small class="font-monospace">@order.OrderId.ToString().Substring(0, 8)</small></td>
+                                    <td>
+                                        <strong>@order.Member?.Name</strong><br>
+                                        <small class="text-muted">@order.Member?.Email</small>
+                                    </td>
+                                    <td><strong>$@order.TotalAmount.ToString("N0")</strong></td>
+                                    <td>@order.CreateDate.ToString("yyyy/MM/dd HH:mm")</td>
+                                    <td>@(order.UpdateDate.ToString("yyyy/MM/dd HH:mm") ?? "-")</td>
+                                    <td>
+                                        @if (order.OrderStatus == 0)
+                                        {
+                                            <span class="badge bg-warning text-dark">未付款</span>
+                                        }
+                                        else if (order.OrderStatus == 1)
+                                        {
+                                            <span class="badge bg-success">已付款</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">已取消</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> 詳情
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3">
+                    <p class="text-muted">共 @Model.Count() 筆訂單</p>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">
+                        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+                        {
+                            <text>找不到符合條件的訂單</text>
+                        }
+                        else
+                        {
+                            <text>目前沒有訂單</text>
+                        }
+                    </p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
