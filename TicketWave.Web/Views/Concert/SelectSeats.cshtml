@@ -12,6 +12,11 @@
     var remainingQuota = ViewBag.RemainingQuota != null
         ? (int)ViewBag.RemainingQuota
         : 4;
+
+
+    // 取得會員已購買的座位 ID
+    var memberSeatIds = ViewBag.MemberSeatIds as List<Guid> ?? new List<Guid>();
+
 }
 
 <!-- Banner Section Start-->
@@ -69,6 +74,112 @@
     </div>
 </section>
 <!-- Concert Info Section End -->
+<!-- Ticket Section Start (改為座位圖) -->
+<section id="ticket">
+    <div class="container">
+        <header class="section-header">
+            <h3>座位圖</h3>
+            <p style="color: #6c757d;">點擊座位進行選擇（最多選擇 @remainingQuota 個）</p>
+        </header>
+
+        <!-- 座位圖例 -->
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="col-md-12">
+                <div style="display: flex; gap: 20px; justify-content: center; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="width: 30px; height: 30px; background-color: #d4edda; border: 2px solid #28a745; display: inline-block; border-radius: 3px;"></span>
+                        可選擇
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="width: 30px; height: 30px; background-color: #6c757d; display: inline-block; border-radius: 3px;"></span>
+                        已售出
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="width: 30px; height: 30px; background-color: #dc3545; border: 2px solid #a71d2a; display: inline-block; border-radius: 3px;"></span>
+                        <strong>您已購買</strong>
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="width: 30px; height: 30px; background-color: #ffc107; display: inline-block; border-radius: 3px;"></span>
+                        已選擇
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 舞台 -->
+        <div class="row" style="margin-bottom: 40px;">
+            <div class="col-md-12">
+                <div style="text-align: center; margin: 30px auto; max-width: 600px;">
+                    <div style="background-color: #343a40; color: white; padding: 20px; border-radius: 5px;">
+                        <i class="fas fa-guitar"></i> 舞台 STAGE
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 座位區域 -->
+        @{
+            var seatsByZone = Model.GroupBy(s => s.SeatZone).OrderBy(g => g.Key);
+        }
+
+        @foreach (var zone in seatsByZone)
+        {
+            <div class="row" style="margin-bottom: 40px;">
+                <div class="col-md-12">
+                    <div class="single-ticket" style="padding: 30px;">
+                        <h4 style="color: #007bff; margin-bottom: 20px;">
+                            <i class="fas fa-map-marker-alt"></i> @zone.Key
+                            <small style="color: #6c757d; font-size: 16px;">
+                                (NT$ @zone.First().Price)
+                            </small>
+                        </h4>
+
+                        @{
+                            var seatsByRow = zone.GroupBy(s => s.SeatRow).OrderBy(g => g.Key);
+                        }
+
+                        @foreach (var row in seatsByRow)
+                        {
+                            <div class="seat-row" style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <span class="row-label" style="min-width: 70px; font-weight: bold; color: #495057;">@row.Key 排</span>
+                                <div class="seats-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    @foreach (var seat in row.OrderBy(s => s.SeatNumber))
+                                    {
+                                        // var statusClass = seat.SeatStatus == 0 ? "available" : "sold";
+
+                                        var isMySeat = memberSeatIds.Contains(seat.SeatId);
+                                        var statusClass = isMySeat ? "my-seat" : (seat.SeatStatus == 0 ? "available" : "sold");
+                                        // var titleText = isMySeat
+                                        // ? $"{seat.SeatZone} {seat.SeatRow} 排 {seat.SeatNumber} 號 - NT$ {seat.Price} (您已購買)"
+                                        // : $"{seat.SeatZone} {seat.SeatRow} 排 {seat.SeatNumber} 號 - NT$ {seat.Price}";
+
+
+                                        <button type="button"
+                                                class="seat-btn @statusClass"
+                                                data-seat-id="@seat.SeatId"
+                                                data-zone="@seat.SeatZone"
+                                                data-row="@seat.SeatRow"
+                                                data-number="@seat.SeatNumber"
+                                                data-price="@seat.Price"
+                                                data-status="@seat.SeatStatus"
+
+                                               @(seat.SeatStatus != 0 ? "disabled" : "")
+                                               title="@seat.SeatZone @seat.SeatRow 排 @seat.SeatNumber 號 - NT$ @seat.Price">
+                                               @seat.SeatNumber
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+<!-- Ticket Section End -->
+
+
 @if (remainingQuota == 0)
 {
     <!-- 已達購票上限提示 -->
@@ -110,97 +221,7 @@ else
         </div>
     </section>
     <!-- Cart Section End -->
-    <!-- Ticket Section Start (改為座位圖) -->
-    <section id="ticket">
-        <div class="container">
-            <header class="section-header">
-                <h3>座位圖</h3>
-                <p style="color: #6c757d;">點擊座位進行選擇（最多選擇 @remainingQuota 個）</p>
-            </header>
-
-            <!-- 座位圖例 -->
-            <div class="row" style="margin-bottom: 30px;">
-                <div class="col-md-12">
-                    <div style="display: flex; gap: 20px; justify-content: center; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-                        <span style="display: flex; align-items: center; gap: 5px;">
-                            <span style="width: 30px; height: 30px; background-color: #d4edda; border: 2px solid #28a745; display: inline-block; border-radius: 3px;"></span>
-                            可選擇
-                        </span>
-                        <span style="display: flex; align-items: center; gap: 5px;">
-                            <span style="width: 30px; height: 30px; background-color: #6c757d; display: inline-block; border-radius: 3px;"></span>
-                            已售出
-                        </span>
-                        <span style="display: flex; align-items: center; gap: 5px;">
-                            <span style="width: 30px; height: 30px; background-color: #ffc107; display: inline-block; border-radius: 3px;"></span>
-                            已選擇
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 舞台 -->
-            <div class="row" style="margin-bottom: 40px;">
-                <div class="col-md-12">
-                    <div style="text-align: center; margin: 30px auto; max-width: 600px;">
-                        <div style="background-color: #343a40; color: white; padding: 20px; border-radius: 5px;">
-                            <i class="fas fa-guitar"></i> 舞台 STAGE
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 座位區域 -->
-            @{
-                var seatsByZone = Model.GroupBy(s => s.SeatZone).OrderBy(g => g.Key);
-            }
-
-            @foreach (var zone in seatsByZone)
-            {
-                <div class="row" style="margin-bottom: 40px;">
-                    <div class="col-md-12">
-                        <div class="single-ticket" style="padding: 30px;">
-                            <h4 style="color: #007bff; margin-bottom: 20px;">
-                                <i class="fas fa-map-marker-alt"></i> @zone.Key
-                                <small style="color: #6c757d; font-size: 16px;">
-                                    (NT$ @zone.First().Price)
-                                </small>
-                            </h4>
-
-                            @{
-                                var seatsByRow = zone.GroupBy(s => s.SeatRow).OrderBy(g => g.Key);
-                            }
-
-                            @foreach (var row in seatsByRow)
-                            {
-                                <div class="seat-row" style="display: flex; align-items: center; margin-bottom: 15px;">
-                                    <span class="row-label" style="min-width: 70px; font-weight: bold; color: #495057;">@row.Key 排</span>
-                                    <div class="seats-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                        @foreach (var seat in row.OrderBy(s => s.SeatNumber))
-                                        {
-                                            var statusClass = seat.SeatStatus == 0 ? "available" : "sold";
-                                            <button type="button"
-                                                    class="seat-btn @statusClass"
-                                                    data-seat-id="@seat.SeatId"
-                                                    data-zone="@seat.SeatZone"
-                                                    data-row="@seat.SeatRow"
-                                                    data-number="@seat.SeatNumber"
-                                                    data-price="@seat.Price"
-                                                    data-status="@seat.SeatStatus"
-                                                    @(seat.SeatStatus != 0 ? "disabled" : "")
-                                                    title="@seat.SeatZone @seat.SeatRow 排 @seat.SeatNumber 號 - NT$ @seat.Price">
-                                                @seat.SeatNumber
-                                            </button>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    </section>
-    <!-- Ticket Section End -->
+  
 }
 
 @section MyCSS {
@@ -230,6 +251,23 @@ else
                 cursor: not-allowed;
                 opacity: 0.5;
             }
+
+            /* 會員已購買的座位樣式 */
+            .seat-btn.my-seat {
+                background-color: #dc3545;
+                border: 2px solid #a71d2a;
+                color: white;
+                cursor: not-allowed;
+                opacity: 1;
+                font-weight: bold;
+            }
+
+                .seat-btn.my-seat:hover {
+                    transform: scale(1.05);
+                    box-shadow: 0 0 15px rgba(220, 53, 69, 0.6);
+                }
+
+
 
             .seat-btn.selected {
                 background-color: #ffc107;
@@ -387,7 +425,7 @@ else
                 $.get('@Url.Action("CheckSeatStatus", "Concert")?concertId=' + concertId, function(seats) {
                     seats.forEach(function(seat) {
                         const $btn = $(`.seat-btn[data-seat-id="${seat.seatId}"]`);
-                        if (seat.status === 1 && !$btn.hasClass('sold')) {
+                        if (seat.status === 1 && !$btn.hasClass('sold') && !$btn.hasClass('my-seat')) {
                             $btn.removeClass('available selected')
                                 .addClass('sold')
                                 .prop('disabled', true);

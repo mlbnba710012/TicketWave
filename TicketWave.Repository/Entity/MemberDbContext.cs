@@ -13,54 +13,73 @@ public partial class MemberDbContext : DbContext
     {
     }
 
+    public virtual DbSet<Concert> Concerts { get; set; }
+
     public virtual DbSet<Member> Members { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
+
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
 
-    public virtual DbSet<Concert> Concerts { get; set; }
     public virtual DbSet<Seat> Seats { get; set; }
-
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Concert>(entity =>
+        {
+            entity.HasKey(e => e.ConcertId).HasName("PK_Concerts");
+
+            entity.Property(e => e.ConcertId).ValueGeneratedNever();
+        });
+
         modelBuilder.Entity<Member>(entity =>
         {
             entity.HasKey(e => e.MemberId).HasName("PK_Members");
 
-            entity.Property(e => e.MemberId).ValueGeneratedNever();
-            //entity.Property(e => e.Password).HasDefaultValue("", "DF__Members__Passwor__5AEE82B9");
-            entity.Property(e => e.Password).HasDefaultValue("");
+            entity.Property(e => e.MemberId)
+                .ValueGeneratedNever()
+                .HasComment("會員Id");
+            entity.Property(e => e.Address).HasComment("地址");
+            entity.Property(e => e.BirthDate).HasComment("生日");
+            entity.Property(e => e.CreateDate).HasComment("建立日期");
+            entity.Property(e => e.Email).HasComment("EMAIL");
+            entity.Property(e => e.IsDelete).HasComment("是否刪除");
+            entity.Property(e => e.Name).HasComment("會員姓名");
+            entity.Property(e => e.NationalID).HasComment("身分證字號");
+            entity.Property(e => e.Password)
+                .HasDefaultValue("")
+                .HasComment("密碼")
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__Members__Passwor__5AEE82B9");
+            entity.Property(e => e.Phone).HasComment("手機");
+            entity.Property(e => e.UpdateDate).HasComment("更新日期");
         });
 
-        // Order 設定
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK_Orders");
             entity.Property(e => e.OrderId).ValueGeneratedNever();
 
-            // 設定與 Member 的關聯
-            entity.HasOne(d => d.Member)
-                .WithMany()
-                .HasForeignKey(d => d.MemberId)
-                .OnDelete(DeleteBehavior.Restrict)
+            entity.HasOne(d => d.Member).WithMany(p => p.Orders)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_Member");
         });
 
-        // OrderDetail 設定
         modelBuilder.Entity<OrderDetail>(entity =>
         {
-            entity.HasKey(e => e.OrderDetailId).HasName("PK_OrderDetails");
             entity.Property(e => e.OrderDetailId).ValueGeneratedNever();
 
-            // 設定與 Order 的關聯（刪除訂單時一併刪除明細）
-            entity.HasOne(d => d.Order)
-                .WithMany(p => p.OrderDetails)
-                .HasForeignKey(d => d.OrderId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_OrderDetail_Order");
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderDetails).HasConstraintName("FK_OrderDetail_Order");
         });
 
+        modelBuilder.Entity<Seat>(entity =>
+        {
+            entity.HasKey(e => e.SeatId).HasName("PK_Seats");
+
+            entity.Property(e => e.SeatId).ValueGeneratedNever();
+
+            entity.HasOne(d => d.Concert).WithMany(p => p.Seats)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Seat_Concert");
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }

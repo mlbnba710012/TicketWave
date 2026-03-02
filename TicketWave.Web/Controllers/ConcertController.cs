@@ -112,6 +112,21 @@ namespace TicketWave.Web.Controllers
                     .ThenBy(s => s.SeatNumber)
                     .ToListAsync();
 
+                // 取得會員已購買的座位
+                var memberSeatIds = await _dbContext.OrderDetails
+                    .Where(od => od.Order.MemberId == memberId
+                              && od.Order.ConcertId == concertId
+                              && od.Order.OrderStatus != 2)
+                    .Join(_dbContext.Seats,
+                          od => od.OrderDetailId,
+                          s => s.OrderDetailId,
+                          (od, s) => s.SeatId)
+                    .ToListAsync();
+
+                ViewBag.MemberSeatIds = memberSeatIds;
+                _logger.LogInformation($"會員 {memberId} 已購買的座位數：{memberSeatIds.Count}");
+
+
                 return View(seats);
             }
             catch (Exception ex)

@@ -54,7 +54,7 @@ namespace TicketWave.BackWeb.Controllers
                 }
 
                 // 驗證帳號密碼
-                if (username == adminUsername && password == adminPassword)
+                if (username.Trim() == adminUsername && password.Trim() == adminPassword)
                 {
                     // 登入成功，設定 Session
                     HttpContext.Session.SetString("AdminUsername", username);

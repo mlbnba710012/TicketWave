@@ -13,43 +13,80 @@ namespace TicketWave.Repository.Entity;
 [Index("NationalID", Name = "IX_Members_NationalID", IsUnique = true)]
 public partial class Member
 {
+    /// <summary>
+    /// 會員Id
+    /// </summary>
     [Key]
     public Guid MemberId { get; set; }
 
+    /// <summary>
+    /// 會員姓名
+    /// </summary>
     [StringLength(50)]
     public string Name { get; set; }
 
+    /// <summary>
+    /// 身分證字號
+    /// </summary>
     [Required]
     [StringLength(10)]
     [Unicode(false)]
     public string NationalID { get; set; }
 
+    /// <summary>
+    /// 手機
+    /// </summary>
     [Required]
     [StringLength(10)]
     [Unicode(false)]
     public string Phone { get; set; }
 
+    /// <summary>
+    /// EMAIL
+    /// </summary>
     [Required]
     [StringLength(100)]
     [Unicode(false)]
     public string Email { get; set; }
 
+    /// <summary>
+    /// 生日
+    /// </summary>
     [StringLength(10)]
     [Unicode(false)]
     public string BirthDate { get; set; }
 
+    /// <summary>
+    /// 密碼
+    /// </summary>
     [Required]
     [StringLength(50)]
     [Unicode(false)]
     public string Password { get; set; }
 
+    /// <summary>
+    /// 地址
+    /// </summary>
     [StringLength(100)]
     public string Address { get; set; }
 
+    /// <summary>
+    /// 是否刪除
+    /// </summary>
+    public bool IsDelete { get; set; }
+
+    /// <summary>
+    /// 建立日期
+    /// </summary>
     [Column(TypeName = "datetime")]
     public DateTime CreateDate { get; set; }
 
+    /// <summary>
+    /// 更新日期
+    /// </summary>
     [Column(TypeName = "datetime")]
     public DateTime UpdateDate { get; set; }
-    //public object Orders { get; set; }
+
+    [InverseProperty("Member")]
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

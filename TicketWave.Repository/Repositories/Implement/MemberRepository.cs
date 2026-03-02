@@ -19,7 +19,7 @@ namespace TicketWave.Repository.Repositories.Implement
 
         public async Task<List<Member>> GetAll()
         {
-            return await _dbContext.Members.ToListAsync();
+            return await _dbContext.Members.AsNoTracking().ToListAsync();
         }
 
         public async Task Add(Member member)

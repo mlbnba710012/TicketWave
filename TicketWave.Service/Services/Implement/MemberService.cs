@@ -48,6 +48,7 @@ namespace TicketWave.Service.Services.Implement
                 Phone = info.Phone,
                 Email = info.Email,
                 Password = info.Password,
+                IsDelete = false,
                 CreateDate = now,
                 UpdateDate = now
             };
@@ -154,7 +155,9 @@ namespace TicketWave.Service.Services.Implement
             }
 
             // 3. 刪除會員
-            await _memberRepository.Delete(member);
+            //await _memberRepository.Delete(member);
+            member.IsDelete = true; // 標記為刪除
+            await _memberRepository.Update(member);
 
             return (true, "帳號已成功刪除");
         }
