@@ -30,72 +30,60 @@
 </head>
 
 <body>
-    <!-- Header Start -->
+    <!-- Topbar Start (會員列) -->
+    <div id="topbar">
+        <div class="container-fluid topbar-inner">
+            <div class="topbar-left">
+                @* 你要放搜尋/文字都行 *@
+            </div>
+
+            <div class="topbar-right">
+                @if (Context.Session.GetString("MemberName") != null)
+                {
+                    <span class="topbar-text">@Context.Session.GetString("MemberName") 您好</span>
+
+                    <a href="/Member/Profile" class="btn btn-sm btn-info">會員中心</a>
+
+                    <form asp-controller="Member" asp-action="Logout" method="post" style="margin:0;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-danger">登出</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="/Member/Login" class="btn btn-sm btn-outline-light">Login</a>
+                    <a href="/Member/Register" class="btn btn-sm btn-light">Register</a>
+                }
+            </div>
+        </div>
+    </div>
+    <!-- Topbar End -->
+    <!-- Header Start (主選單列) -->
     <header id="header">
         <div class="container-fluid">
-
             <div id="logo" class="pull-left">
-                <!-- Uncomment below if you prefer to use text logo -->
-                <!-- <h1><a href="index.html" class="scrollto">Tech Conference</a></h1> -->
-                <a href="index.html"><img src="~/img/logo.png" alt="Logo" /></a>
+                @* <a href="/Home/Index"><img src="~/img/ticket_logo_03.png" alt="Logo" /></a> *@
+                <a href="/Home/Index"><img src="~/img/logo.png" alt="Logo" /></a>
             </div>
 
             <nav id="nav-menu-container">
                 <ul class="nav-menu">
                     <li><a href="/Home/index">Home</a></li>
-                    <li><a href="/Home/Concerts">Concerts</a></li>
-                    <li><a href="speaker.html">Speakers</a></li>
-                    <li><a href="agenda.html">Agenda</a></li>
-                    <li><a href="venue.html">Venue</a></li>
+                    <li><a href="/Concert/Index">Concerts</a></li>
+                    <li><a href="/Sports/Index">Sports</a></li>
+                    <li><a href="/Theater/Index">Theater</a></li>
+                    <li><a href="/Venue/Index">Venue</a></li>
                     <li><a href="/Home/ticket">Tickets</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                    <div class="user-info" style="display: flex; align-items: center; gap: 10px;">
-                        @if (Context.Session.GetString("MemberName") != null)
-                        {
-                            <!-- 已登入 -->
-                            <span>@Context.Session.GetString("MemberName") 您好</span>
-                            <form asp-controller="Member" asp-action="Profile" method="get" style="margin: 0;">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-info">會員中心</button>
-                            </form>
-                            <form asp-controller="Member" asp-action="Logout" method="post" style="margin: 0;">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-danger">Logout</button>
-                            </form>
-                        }
-                        else
-                        {
-                            <!-- 未登入 -->
-                        @* <li class="menu-active"><a href="/Member/login">Login</a></li>
-                        <li class="menu-active"><a href="/Member/register">Register</a></li> *@
-                            <a href="/Member/Login" class="btn btn-sm btn-outline-primary">Login</a>
-                            <a href="/Member/Register" class="btn btn-sm btn-primary">Register</a>
-                        }
-                    </div>
-                    @* <li class="menu-active"><a href="/Member/login">Login</a></li>
-                    <li class="menu-active"><a href="/Member/register">Register</a></li> *@
-                    @* @{
-
-                        Member user = Context.Session.Get<Member>("user");
-
-                        if (user != null)
-                        {
-                            <a href="" class="btn btn-success rounded-pill py-2 px-4 px-lg-3 mb-3 mb-md-3 mb-lg-0">
-                                <i class="fas fa-dragon"></i> @user.Email 你好
-                            </a>
-                        }
-                        else
-                        {
-                            <a href="/Account/Login" class="btn btn-success rounded-pill py-2 px-4 px-lg-3 mb-3 mb-md-3 mb-lg-0">
-                                <i class="fas fa-sign-in-alt"></i> 請登入
-                            </a>
-                        }
-
-                    } *@
+                    <li><a href="/Home/contact">Contact</a></li>
                 </ul>
             </nav>
         </div>
     </header>
+  
+
+    
+
+
     <!-- Header end -->
     @RenderBody()
     <!-- Footer Start -->
