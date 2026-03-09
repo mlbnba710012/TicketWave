@@ -11,8 +11,8 @@ namespace TicketWave.Repository.Repositories.Implement
 {
     public class MemberRepository : IMemberRepository
     {
-        private readonly MemberDbContext _dbContext;
-        public MemberRepository(MemberDbContext dbContext)
+        private readonly TicketWaveContext _dbContext;
+        public MemberRepository(TicketWaveContext dbContext)
         {
             _dbContext = dbContext;
         }

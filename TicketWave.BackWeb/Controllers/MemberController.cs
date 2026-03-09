@@ -10,12 +10,12 @@ namespace TicketWave.BackWeb.Controllers
     /// </summary>
     public class MemberController : Controller
     {
-        private readonly MemberDbContext _dbContext;
+        private readonly TicketWaveContext _dbContext;
         private readonly IMemberService _memberService;
         private readonly ILogger<MemberController> _logger;
 
         public MemberController(
-            MemberDbContext dbContext,
+            TicketWaveContext dbContext,
             IMemberService memberService,
             ILogger<MemberController> logger)
         {

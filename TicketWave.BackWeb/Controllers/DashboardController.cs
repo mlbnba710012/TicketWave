@@ -6,10 +6,10 @@ namespace TicketWave.BackWeb.Controllers
 {
     public class DashboardController : Controller
     {
-        private readonly MemberDbContext _dbContext;
+        private readonly TicketWaveContext _dbContext;
         private readonly ILogger<DashboardController> _logger;
 
-        public DashboardController(MemberDbContext dbContext, ILogger<DashboardController> logger)
+        public DashboardController(TicketWaveContext dbContext, ILogger<DashboardController> logger)
         {
             _dbContext = dbContext;
             _logger = logger;

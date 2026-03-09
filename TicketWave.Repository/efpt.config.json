@@ -1,6 +1,6 @@
 ﻿{
-   "CodeGenerationMode": 4,
-   "ContextClassName": "MemberDbContext",
+   "CodeGenerationMode": 5,
+   "ContextClassName": "TicketWaveContext",
    "ContextNamespace": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,

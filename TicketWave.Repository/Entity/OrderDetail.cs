@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace TicketWave.Repository.Entity;
 
 [Table("OrderDetail")]
-[Index("OrderId", Name = "IX_OrderDetail_OrderId")]
 public partial class OrderDetail
 {
     [Key]

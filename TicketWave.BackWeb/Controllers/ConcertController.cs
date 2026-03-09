@@ -9,10 +9,10 @@ namespace TicketWave.BackWeb.Controllers
     /// </summary>
     public class ConcertController : Controller
     {
-        private readonly MemberDbContext _dbContext;
+        private readonly TicketWaveContext _dbContext;
         private readonly ILogger<ConcertController> _logger;
 
-        public ConcertController(MemberDbContext dbContext, ILogger<ConcertController> logger)
+        public ConcertController(TicketWaveContext dbContext, ILogger<ConcertController> logger)
         {
             _dbContext = dbContext;
             _logger = logger;

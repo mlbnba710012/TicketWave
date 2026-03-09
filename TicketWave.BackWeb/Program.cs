@@ -13,8 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // 資料庫連線
-builder.Services.AddDbContext<MemberDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MemberDb")));
+builder.Services.AddDbContext<TicketWaveContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 註冊 Repository
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();

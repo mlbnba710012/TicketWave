@@ -8,9 +8,9 @@ namespace TicketWave.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly MemberDbContext _dbContext;
+        private readonly TicketWaveContext _dbContext;
 
-        public HomeController(MemberDbContext dbContext)
+        public HomeController(TicketWaveContext dbContext)
         {
             _dbContext = dbContext;
         }

@@ -10,10 +10,10 @@ namespace TicketWave.Service.Services.Implement
 {
     public class OrderService : IOrderService
     {
-        private readonly MemberDbContext _dbContext;
+        private readonly TicketWaveContext _dbContext;
         private const int MAX_TICKETS_PER_CONCERT = 4; // 每場演唱會最多 4 張票
 
-        public OrderService(MemberDbContext dbContext)
+        public OrderService(TicketWaveContext dbContext)
         {
             _dbContext = dbContext;
         }

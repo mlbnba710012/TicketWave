@@ -6,10 +6,10 @@ namespace TicketWave.BackWeb.Controllers
 {
     public class OrderController : Controller
     {
-        private readonly MemberDbContext _dbContext;
+        private readonly TicketWaveContext _dbContext;
         private readonly ILogger<OrderController> _logger;
 
-        public OrderController(MemberDbContext dbContext, ILogger<OrderController> logger)
+        public OrderController(TicketWaveContext dbContext, ILogger<OrderController> logger)
         {
             _dbContext = dbContext;
             _logger = logger;

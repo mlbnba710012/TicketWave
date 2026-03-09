@@ -9,9 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace TicketWave.Repository.Entity;
 
 [Table("Seat")]
-[Index("ConcertId", Name = "IX_Seat_ConcertId")]
-[Index("SeatStatus", Name = "IX_Seat_Status")]
-[Index("ConcertId", "SeatZone", "SeatRow", "SeatNumber", Name = "IX_Seat_Unique", IsUnique = true)]
 public partial class Seat
 {
     [Key]

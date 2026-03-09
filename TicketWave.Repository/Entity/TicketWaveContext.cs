@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TicketWave.Repository.Entity;
 
-public partial class MemberDbContext : DbContext
+public partial class TicketWaveContext : DbContext
 {
-    public MemberDbContext(DbContextOptions<MemberDbContext> options)
+    public TicketWaveContext(DbContextOptions<TicketWaveContext> options)
         : base(options)
     {
     }
@@ -25,6 +25,8 @@ public partial class MemberDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.UseCollation("Chinese_Taiwan_Stroke_90_CI_AS");
+
         modelBuilder.Entity<Concert>(entity =>
         {
             entity.HasKey(e => e.ConcertId).HasName("PK_Concerts");
