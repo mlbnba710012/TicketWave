@@ -18,7 +18,7 @@
                         <p class="banner-nav">
                             <span class="banner-box">
                                 <a href="/Home/index">Home</a>
-                                <a href="/Home/Concerts">Concerts</a>
+                                <a href="/Concert/Index">Concerts</a>
                             </span>
                         </p>
                     </div>
@@ -79,15 +79,16 @@
                         </div>
                     </div>
 
-                    @* 其他演唱會（兩欄） *@
+                    @* 其他演唱會（多欄） *@
                     <div class="col-md-12 about-des">
                         <div class="row">
-                            @for (int i = 1; i < Model.Count && i < 3; i++)
+                            @*for (int i = 1; i < Model.Count && i < 3; i++)*@
+                            @for (int i = 1; i < Model.Count; i++)
                             {
                                 var concert = Model[i];
                                 var imagePath = $"~/img/concert-{i + 1}.png";
 
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="about-des-col">
                                         <div class="about-img">
                                             @if (!string.IsNullOrEmpty(concert.PosterImageUrl))
@@ -107,11 +108,11 @@
                                                 @concert.Description
                                                 <br />
                                             }
-                                            <i class="fas fa-microphone"></i> 藝人：@concert.ArtistName
+                                            <i class="fa fa-microphone"></i> 藝人：@concert.ArtistName
                                             <br />
-                                            <i class="fas fa-calendar"></i> 時間：@concert.PerformanceDate.ToString("yyyy/MM/dd HH:mm")
+                                            <i class="fa fa-calendar"></i> 時間：@concert.PerformanceDate.ToString("yyyy/MM/dd HH:mm")
                                             <br />
-                                            <i class="fas fa-map-marker-alt"></i> 地點：@concert.VenueName
+                                            <i class="fa fa-map-marker-alt"></i> 地點：@concert.VenueName
                                         </p>
                                         @* <a href="~/Concert/SelectSeats?concertId=@concert.ConcertId">
                                             Buy Tickets

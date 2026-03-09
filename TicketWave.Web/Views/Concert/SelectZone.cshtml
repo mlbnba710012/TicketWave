@@ -1,0 +1,556 @@
+@model List<TicketWave.Web.Models.ZoneViewModel>
+@{
+    ViewData["Title"] = "選擇區域";
+    var concert = ViewBag.Concert as TicketWave.Repository.Entity.Concert;
+
+    // 定義區域順序
+    var zoneOrder = new Dictionary<string, int>
+    {
+        { "VIP區", 1 },
+        { "A區", 2 },
+        { "B區", 3 },
+        { "C區", 4 }
+    };
+}
+
+<!-- Banner -->
+<section class="banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1 class="banner-header">選擇區域</h1>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/Index">Home</a>
+                                <a href="/Concert/Index">Concerts</a>
+                                <a href="#">Select Zone</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 演唱會資訊 -->
+<section style="background-color: #f8f9fa; padding: 30px 0;">
+    <div class="container">
+        <div class="card shadow">
+            <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <h3 class="mb-0"><i class="fa fa-music"></i> @concert.ConcertName</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong><i class="fa fa-user"></i> 藝人：</strong>@concert.ArtistName</p>
+                        <p><strong><i class="fa fa-calendar"></i> 演出時間：</strong>@concert.PerformanceDate.ToString("yyyy/MM/dd HH:mm")</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong><i class="fa fa-map-marker-alt"></i> 場館：</strong>@concert.VenueName</p>
+                        <p><strong><i class="fa fa-map"></i> 地址：</strong>@concert.VenueAddress</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p>
+                            <strong><i class="fa fa-chair"></i> 剩餘座位：</strong>
+                            <span style="color: #28a745; font-weight: bold; font-size: 18px;">@concert.AvailableSeats</span> / @concert.TotalSeats
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 主要區域：左邊座位圖 + 右邊詳細資訊 -->
+<section style="padding: 50px 0; background-color: #fff;">
+    <div class="container-fluid" style="max-width: 1400px;">
+        <header class="section-header text-center mb-4">
+            <h3>選擇座位區域</h3>
+            <p style="color: #6c757d;">點擊座位區域或右側按鈕進行選位</p>
+        </header>
+
+        <div class="row">
+            <!-- 左側：座位區域圖 (60%) -->
+            <div class="col-lg-8">
+                <div class="venue-map-container">
+                    <!-- 場館名稱 -->
+                    <div class="venue-name text-center mb-3">
+                        <h4 style="color: #1e293b; font-weight: bold;">@concert.VenueName</h4>
+                        <p style="color: #64748b; font-size: 14px;">Concert Seating Map</p>
+                    </div>
+
+                    <!-- SVG 座位圖 -->
+                    <svg viewBox="0 0 1000 800" class="venue-map">
+                        <!-- 定義漸層和樣式 -->
+                        <defs>
+                            <!-- 可選擇區域漸層 -->
+                            <linearGradient id="availableGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#4ade80;stop-opacity:0.9" />
+                                <stop offset="100%" style="stop-color:#22c55e;stop-opacity:0.9" />
+                            </linearGradient>
+
+                            <!-- 已售罄區域漸層 -->
+                            <linearGradient id="soldoutGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.7" />
+                                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.7" />
+                            </linearGradient>
+
+                            <!-- VIP區漸層 -->
+                            <linearGradient id="vipGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.9" />
+                                <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:0.9" />
+                            </linearGradient>
+
+                            <!-- 陰影效果 -->
+                            <filter id="shadow">
+                                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3" />
+                            </filter>
+
+                            <!-- 舞台漸層 -->
+                            <linearGradient id="gradient-stage" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+
+                        <!-- 舞台 -->
+                        <g id="stage">
+                            <rect x="350" y="100" width="300" height="80" rx="5"
+                                  fill="url(#gradient-stage)" stroke="#1e293b" stroke-width="3" />
+                            <text x="500" y="135" text-anchor="middle"
+                                  font-size="24" font-weight="bold" fill="white">
+                                🎤 STAGE 舞台
+                            </text>
+                            <text x="500" y="160" text-anchor="middle"
+                                  font-size="14" fill="white">
+                                演出區域
+                            </text>
+                        </g>
+
+                        @{
+                            var vipZone = Model.FirstOrDefault(z => z.ZoneName == "VIP區");
+                            var aZone = Model.FirstOrDefault(z => z.ZoneName == "A區");
+                            var bZone = Model.FirstOrDefault(z => z.ZoneName == "B區");
+                            var cZone = Model.FirstOrDefault(z => z.ZoneName == "C區");
+                        }
+
+                        <!-- VIP區 (舞台正前方) -->
+                        @if (vipZone != null)
+                        {
+                            <g class="zone-area @(vipZone.IsSoldOut ? "sold-out" : "available")"
+                               data-zone="VIP區"
+                               onclick="selectZone('@vipZone.ZoneName', @vipZone.IsSoldOut.ToString().ToLower())">
+
+                                <path d="M 350 220 L 650 220 L 650 340 L 350 340 Z"
+                                      fill="@(vipZone.IsSoldOut ? "url(#soldoutGradient)" : "url(#vipGradient)")"
+                                      stroke="#475569"
+                                      stroke-width="3"
+                                      filter="url(#shadow)"
+                                      class="zone-path" />
+
+                                <text x="500" y="270" text-anchor="middle"
+                                      font-size="28" font-weight="bold" fill="#1e293b">
+                                    VIP區
+                                </text>
+                                <text x="500" y="300" text-anchor="middle"
+                                      font-size="16" fill="#475569">
+                                    NT$ @vipZone.MinPrice.ToString("N0")
+                                </text>
+                                <text x="500" y="325" text-anchor="middle"
+                                      font-size="14" fill="@(vipZone.IsSoldOut ? "#dc2626" : "#059669")" font-weight="bold">
+                                    @(vipZone.IsSoldOut ? "已售罄" : $"剩餘 {vipZone.AvailableSeats} 席")
+                                </text>
+                            </g>
+                        }
+
+                        <!-- A區 (舞台左側) -->
+                        @if (aZone != null)
+                        {
+                            <g class="zone-area @(aZone.IsSoldOut ? "sold-out" : "available")"
+                               data-zone="A區"
+                               onclick="selectZone('@aZone.ZoneName', @aZone.IsSoldOut.ToString().ToLower())">
+
+                                <path d="M 100 220 L 320 220 L 320 450 L 100 450 Z"
+                                      fill="@(aZone.IsSoldOut ? "url(#soldoutGradient)" : "url(#availableGradient)")"
+                                      stroke="#475569"
+                                      stroke-width="3"
+                                      filter="url(#shadow)"
+                                      class="zone-path" />
+
+                                <text x="210" y="320" text-anchor="middle"
+                                      font-size="28" font-weight="bold" fill="#1e293b">
+                                    A區
+                                </text>
+                                <text x="210" y="350" text-anchor="middle"
+                                      font-size="16" fill="#475569">
+                                    NT$ @aZone.MinPrice.ToString("N0")
+                                </text>
+                                <text x="210" y="375" text-anchor="middle"
+                                      font-size="14" fill="@(aZone.IsSoldOut ? "#dc2626" : "#059669")" font-weight="bold">
+                                    @(aZone.IsSoldOut ? "已售罄" : $"剩餘 {aZone.AvailableSeats} 席")
+                                </text>
+                            </g>
+                        }
+
+                        <!-- B區 (舞台右側) -->
+                        @if (bZone != null)
+                        {
+                            <g class="zone-area @(bZone.IsSoldOut ? "sold-out" : "available")"
+                               data-zone="B區"
+                               onclick="selectZone('@bZone.ZoneName', @bZone.IsSoldOut.ToString().ToLower())">
+
+                                <path d="M 680 220 L 900 220 L 900 450 L 680 450 Z"
+                                      fill="@(bZone.IsSoldOut ? "url(#soldoutGradient)" : "url(#availableGradient)")"
+                                      stroke="#475569"
+                                      stroke-width="3"
+                                      filter="url(#shadow)"
+                                      class="zone-path" />
+
+                                <text x="790" y="320" text-anchor="middle"
+                                      font-size="28" font-weight="bold" fill="#1e293b">
+                                    B區
+                                </text>
+                                <text x="790" y="350" text-anchor="middle"
+                                      font-size="16" fill="#475569">
+                                    NT$ @bZone.MinPrice.ToString("N0")
+                                </text>
+                                <text x="790" y="375" text-anchor="middle"
+                                      font-size="14" fill="@(bZone.IsSoldOut ? "#dc2626" : "#059669")" font-weight="bold">
+                                    @(bZone.IsSoldOut ? "已售罄" : $"剩餘 {bZone.AvailableSeats} 席")
+                                </text>
+                            </g>
+                        }
+
+                        <!-- C區 (後方區域) -->
+                        @if (cZone != null)
+                        {
+                            <g class="zone-area @(cZone.IsSoldOut ? "sold-out" : "available")"
+                               data-zone="C區"
+                               onclick="selectZone('@cZone.ZoneName', @cZone.IsSoldOut.ToString().ToLower())">
+
+                                <path d="M 100 480 L 900 480 L 900 650 L 100 650 Z"
+                                      fill="@(cZone.IsSoldOut ? "url(#soldoutGradient)" : "url(#availableGradient)")"
+                                      stroke="#475569"
+                                      stroke-width="3"
+                                      filter="url(#shadow)"
+                                      class="zone-path" />
+
+                                <text x="500" y="550" text-anchor="middle"
+                                      font-size="28" font-weight="bold" fill="#1e293b">
+                                    C區
+                                </text>
+                                <text x="500" y="580" text-anchor="middle"
+                                      font-size="16" fill="#475569">
+                                    NT$ @cZone.MinPrice.ToString("N0")
+                                </text>
+                                <text x="500" y="605" text-anchor="middle"
+                                      font-size="14" fill="@(cZone.IsSoldOut ? "#dc2626" : "#059669")" font-weight="bold">
+                                    @(cZone.IsSoldOut ? "已售罄" : $"剩餘 {cZone.AvailableSeats} 席")
+                                </text>
+                            </g>
+                        }
+                    </svg>
+
+                    <!-- 圖例說明 -->
+                    <div class="legend-container mt-3">
+                        <div class="legend-item">
+                            <div class="legend-box available"></div>
+                            <span>可選擇</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box soldout"></div>
+                            <span>已售罄</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box vip"></div>
+                            <span>VIP區域</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側：區域詳細資訊列表 (40%) -->
+            <div class="col-lg-4">
+                <div class="zone-info-panel">
+                    <h4 class="mb-4" style="color: #1e293b; font-weight: bold; border-bottom: 3px solid #667eea; padding-bottom: 10px;">
+                        <i class="fa fa-list"></i> 區域詳細資訊
+                    </h4>
+
+                    @{
+                        var orderedZones = Model
+                        .OrderBy(z => zoneOrder.ContainsKey(z.ZoneName) ? zoneOrder[z.ZoneName] : 999)
+                        .ThenBy(z => z.ZoneName);
+                    }
+
+                    @foreach (var zone in orderedZones)
+                    {
+                        var zoneColor = zone.ZoneName == "VIP區" ? "#f59e0b" : (zone.IsSoldOut ? "#3b82f6" : "#22c55e");
+                        var zoneBgColor = zone.ZoneName == "VIP區" ? "#fef3c7" : (zone.IsSoldOut ? "#dbeafe" : "#d1fae5");
+
+                        <div class="zone-detail-card mb-3"
+                             style="border-left: 5px solid @zoneColor; background-color: @zoneBgColor;"
+                             onmouseenter="highlightZone('@zone.ZoneName')"
+                             onmouseleave="unhighlightZone('@zone.ZoneName')">
+                            <div class="card-body p-3">
+                                <div class="row align-items-center">
+                                    <!-- 區域名稱和價格 -->
+                                    <div class="col-5">
+                                        <h5 class="mb-1" style="color: @zoneColor; font-weight: bold;">
+                                            <i class="fa fa-map-marker-alt"></i> @zone.ZoneName
+                                        </h5>
+                                        <p class="mb-0" style="font-size: 24px; color: #dc2626; font-weight: bold;">
+                                            NT$ @zone.MinPrice.ToString("N0")
+                                        </p>
+                                    </div>
+
+                                    <!-- 座位資訊 -->
+                                    <div class="col-4">
+                                        <p class="mb-1" style="font-size: 14px; color: #64748b;">
+                                            <strong>剩餘座位</strong>
+                                        </p>
+                                        <p class="mb-0" style="font-size: 20px; font-weight: bold; color: @(zone.IsSoldOut ? "#dc2626" : "#059669");">
+                                            @zone.AvailableSeats
+                                            <small style="font-size: 14px; color: #64748b;">/ @zone.TotalSeats</small>
+                                        </p>
+                                        <!-- 小進度條 -->
+                                        <div class="progress mt-1" style="height: 8px;">
+                                            <div class="progress-bar"
+                                                 style="width: @zone.SoldPercentage%; background-color: @zoneColor;"
+                                                 role="progressbar"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 按鈕 -->
+                                    <div class="col-3 text-right">
+                                        @if (zone.IsSoldOut)
+                                        {
+                                            <button class="btn btn-sm btn-secondary" disabled style="width: 100%;">
+                                                <i class="fa fa-times"></i><br />已售罄
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("SelectQuantity", "Concert", new { concertId = concert.ConcertId, zone = zone.ZoneName })"
+                                               class="btn btn-sm btn-primary"
+                                               style="background-color: @zoneColor; border-color: @zoneColor; width: 100%; font-weight: bold;">
+                                                <i class="fa fa-ticket-alt"></i><br />選此區
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .venue-map-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .venue-map {
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        display: block;
+    }
+
+    .zone-area {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .zone-area:not(.sold-out):hover .zone-path {
+            filter: brightness(1.15) url(#shadow);
+            transform: scale(1.02);
+            transform-origin: center;
+        }
+
+        .zone-area:not(.sold-out):hover {
+            opacity: 0.95;
+        }
+
+        .zone-area.sold-out {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+    .zone-path {
+        transition: all 0.3s ease;
+    }
+
+    /* 高亮效果 */
+    .zone-area.highlight .zone-path {
+        filter: brightness(1.2) url(#shadow);
+        stroke: #ff6b6b;
+        stroke-width: 5;
+    }
+
+    .legend-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        padding: 15px;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .legend-box {
+        width: 30px;
+        height: 25px;
+        border-radius: 4px;
+        border: 2px solid #475569;
+    }
+
+        .legend-box.available {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+        }
+
+        .legend-box.soldout {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        }
+
+        .legend-box.vip {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
+    /* 右側詳細資訊面板 */
+    .zone-info-panel {
+        background-color: #f8f9fa;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        height: 100%;
+    }
+
+    .zone-detail-card {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+        .zone-detail-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .zone-detail-card .btn {
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+            .zone-detail-card .btn:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            }
+
+    @@media (max-width: 992px) {
+        .col-lg-7, .col-lg-5 {
+            margin-bottom: 30px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .venue-map-container {
+            padding: 15px;
+        }
+
+        .legend-container {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .zone-detail-card .row {
+            flex-direction: column;
+        }
+
+        .zone-detail-card .col-5,
+        .zone-detail-card .col-4,
+        .zone-detail-card .col-3 {
+            width: 100%;
+            text-align: left !important;
+            margin-bottom: 10px;
+        }
+    }
+</style>
+
+<script>
+    function selectZone(zoneName, isSoldOut) {
+        if (isSoldOut) {
+            alert('此區域已售罄');
+            return;
+        }
+
+        window.location.href = '@Url.Action("SelectQuantity", "Concert")?concertId=@concert.ConcertId&zone=' + encodeURIComponent(zoneName);
+    }
+
+    // 滑鼠移入右側卡片，高亮左側對應區域
+    function highlightZone(zoneName) {
+        const zoneElement = document.querySelector(`.zone-area[data-zone="${zoneName}"]`);
+        if (zoneElement) {
+            zoneElement.classList.add('highlight');
+        }
+    }
+
+    function unhighlightZone(zoneName) {
+        const zoneElement = document.querySelector(`.zone-area[data-zone="${zoneName}"]`);
+        if (zoneElement) {
+            zoneElement.classList.remove('highlight');
+        }
+    }
+
+    // 視覺化提示
+    document.querySelectorAll('.zone-area:not(.sold-out)').forEach(zone => {
+        zone.addEventListener('mouseenter', function() {
+            const zoneName = this.getAttribute('data-zone');
+            const tooltip = document.createElement('div');
+            tooltip.className = 'zone-tooltip';
+            tooltip.textContent = `點擊選擇 ${zoneName}`;
+            tooltip.style.cssText = `
+                position: fixed;
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 8px 15px;
+                border-radius: 5px;
+                font-size: 14px;
+                pointer-events: none;
+                z-index: 9999;
+                display: none;
+            `;
+            document.body.appendChild(tooltip);
+
+            this.addEventListener('mousemove', function(e) {
+                tooltip.style.left = e.clientX + 15 + 'px';
+                tooltip.style.top = e.clientY + 15 + 'px';
+                tooltip.style.display = 'block';
+            });
+
+            this.addEventListener('mouseleave', function() {
+                tooltip.remove();
+            });
+        });
+    });
+</script>

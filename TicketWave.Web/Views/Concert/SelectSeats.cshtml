@@ -1,34 +1,22 @@
-﻿@model List<TicketWave.Repository.Entity.Seat>
+@model List<TicketWave.Repository.Entity.Seat>
 @{
-    ViewData["Title"] = "Ticket";
+    ViewData["Title"] = "選擇座位";
     var concert = ViewBag.Concert as TicketWave.Repository.Entity.Concert;
-    // var currentTicketCount = (int)ViewBag.CurrentTicketCount;
-    // var remainingQuota = (int)ViewBag.RemainingQuota;
-
-    var currentTicketCount = ViewBag.CurrentTicketCount != null
-    ? (int)ViewBag.CurrentTicketCount
-    : 0;
-
-    var remainingQuota = ViewBag.RemainingQuota != null
-        ? (int)ViewBag.RemainingQuota
-        : 4;
-
-
-    // 取得會員已購買的座位 ID
+    var currentTicketCount = ViewBag.CurrentTicketCount != null ? (int)ViewBag.CurrentTicketCount : 0;
+    var remainingQuota = ViewBag.RemainingQuota != null ? (int)ViewBag.RemainingQuota : 4;
+    var selectedZone = ViewBag.SelectedZone as string;
+    var selectedQuantity = ViewBag.SelectedQuantity != null ? (int)ViewBag.SelectedQuantity : 0;
     var memberSeatIds = ViewBag.MemberSeatIds as List<Guid> ?? new List<Guid>();
-
 }
 
-<!-- Banner Section Start-->
-<section class="concert">
+<!-- Banner -->
+<section class="banner">
     <div class="container">
         <div class="row">
             <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-6">
-                        <h1 class="banner-header">
-                            選擇座位
-                        </h1>
+                        <h1 class="banner-header">選擇座位</h1>
                     </div>
                     <div class="col-md-6">
                         <p class="banner-nav">
@@ -44,42 +32,82 @@
         </div>
     </div>
 </section>
-<!-- Banner Section end -->
-<!-- Concert Info Section Start -->
-<section id="concert-info" style="background-color: #f8f9fa; padding: 30px 0;">
+
+<!-- 進度條 -->
+<section style="background-color: #f8f9fa; padding: 30px 0;">
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header" style="background-color: #343a40; color: white;">
-                        <h3><i class="fas fa-music"></i> @concert.ConcertName</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>藝人：</strong>@concert.ArtistName</p>
-                                <p><strong>演出時間：</strong>@concert.PerformanceDate.ToString("yyyy/MM/dd HH:mm")</p>
-                                <p><strong>場館：</strong>@concert.VenueName</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>剩餘座位：</strong>@concert.AvailableSeats / @concert.TotalSeats</p>
-                                <p><strong>您已購買：</strong>@currentTicketCount 張</p>
-                                <p><strong>還可購買：</strong><span style="color: #dc3545; font-weight: bold;">@remainingQuota 張</span>（每場最多 4 張）</p>
-                            </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto;">
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background-color: #28a745; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 20px;">
+                            <i class="fa fa-check"></i>
                         </div>
+                        <small style="margin-top: 5px; display: block;">選擇區域</small>
+                    </div>
+                    <div style="flex: 1; height: 3px; background-color: #28a745; margin: 0 10px;"></div>
+                    
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background-color: #28a745; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 20px;">
+                            <i class="fa fa-check"></i>
+                        </div>
+                        <small style="margin-top: 5px; display: block;">選擇張數</small>
+                    </div>
+                    <div style="flex: 1; height: 3px; background-color: #007bff; margin: 0 10px;"></div>
+                    
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background-color: #007bff; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 20px; font-weight: bold;">
+                            3
+                        </div>
+                        <small style="margin-top: 5px; display: block;"><strong>選擇座位</strong></small>
+                    </div>
+                    <div style="flex: 1; height: 3px; background-color: #ddd; margin: 0 10px;"></div>
+                    
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background-color: #ddd; color: #666; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 20px;">
+                            4
+                        </div>
+                        <small style="margin-top: 5px; display: block;">確認購買</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
-<!-- Concert Info Section End -->
-<!-- Ticket Section Start (改為座位圖) -->
-<section id="ticket">
+
+<!-- 演唱會資訊 -->
+<section style="background-color: #f8f9fa; padding: 20px 0;">
+    <div class="container">
+        <div class="card">
+            <div class="card-header" style="background-color: #343a40; color: white;">
+                <h3><i class="fa fa-music"></i> @concert.ConcertName</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong>演出時間：</strong>@concert.PerformanceDate.ToString("yyyy/MM/dd HH:mm")</p>
+                        <p><strong>場館：</strong>@concert.VenueName</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>選擇區域：</strong><span class="badge badge-info" style="font-size: 16px;">@selectedZone</span></p>
+                        <p><strong>需選座位：</strong><span style="color: #dc3545; font-weight: bold; font-size: 18px;">@selectedQuantity 張</span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>您已購買：</strong>@currentTicketCount 張</p>
+                        <p><strong>還可購買：</strong><span style="color: #dc3545; font-weight: bold;">@remainingQuota 張</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 座位圖 -->
+<section id="ticket" style="padding: 30px 0;">
     <div class="container">
         <header class="section-header">
-            <h3>座位圖</h3>
-            <p style="color: #6c757d;">點擊座位進行選擇（最多選擇 @remainingQuota 個）</p>
+            <h3>@selectedZone - 座位圖</h3>
+            <p style="color: #6c757d;">請選擇 <strong style="color: #dc3545;">@selectedQuantity 個</strong> 座位</p>
         </header>
 
         <!-- 座位圖例 -->
@@ -111,332 +139,327 @@
             <div class="col-md-12">
                 <div style="text-align: center; margin: 30px auto; max-width: 600px;">
                     <div style="background-color: #343a40; color: white; padding: 20px; border-radius: 5px;">
-                        <i class="fas fa-guitar"></i> 舞台 STAGE
+                        <i class="fa fa-guitar"></i> 舞台 STAGE
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 座位區域 -->
+        <!-- 座位區域（使用 C# 排序） -->
         @{
-            var seatsByZone = Model.GroupBy(s => s.SeatZone).OrderBy(g => g.Key);
+            // 在 C# 中排序
+            var sortedSeats = Model
+                .OrderBy(s => 
+                {
+                    if (int.TryParse(s.SeatRow, out int rowNum))
+                        return rowNum;
+                    return 999;
+                })
+                .ThenBy(s => s.SeatRow)
+                .ToList();
+
+            var seatsByRow = sortedSeats.GroupBy(s => s.SeatRow);
         }
 
-        @foreach (var zone in seatsByZone)
-        {
-            <div class="row" style="margin-bottom: 40px;">
-                <div class="col-md-12">
-                    <div class="single-ticket" style="padding: 30px;">
-                        <h4 style="color: #007bff; margin-bottom: 20px;">
-                            <i class="fas fa-map-marker-alt"></i> @zone.Key
-                            <small style="color: #6c757d; font-size: 16px;">
-                                (NT$ @zone.First().Price)
-                            </small>
-                        </h4>
-
-                        @{
-                            var seatsByRow = zone.GroupBy(s => s.SeatRow).OrderBy(g => g.Key);
-                        }
-
-                        @foreach (var row in seatsByRow)
+        <div class="row">
+            <div class="col-md-12">
+                <div class="single-ticket" style="padding: 30px; border: 1px solid #dee2e6; background-color: #fff;">
+                    <h4 style="color: #007bff; margin-bottom: 20px;">
+                        <i class="fa fa-map-marker-alt"></i> @selectedZone
+                        @if (Model.Any())
                         {
-                            <div class="seat-row" style="display: flex; align-items: center; margin-bottom: 15px;">
-                                <span class="row-label" style="min-width: 70px; font-weight: bold; color: #495057;">@row.Key 排</span>
-                                <div class="seats-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                    @foreach (var seat in row.OrderBy(s => s.SeatNumber))
-                                    {
-                                        // var statusClass = seat.SeatStatus == 0 ? "available" : "sold";
-
-                                        var isMySeat = memberSeatIds.Contains(seat.SeatId);
-                                        var statusClass = isMySeat ? "my-seat" : (seat.SeatStatus == 0 ? "available" : "sold");
-                                        // var titleText = isMySeat
-                                        // ? $"{seat.SeatZone} {seat.SeatRow} 排 {seat.SeatNumber} 號 - NT$ {seat.Price} (您已購買)"
-                                        // : $"{seat.SeatZone} {seat.SeatRow} 排 {seat.SeatNumber} 號 - NT$ {seat.Price}";
-
-
-                                        <button type="button"
-                                                class="seat-btn @statusClass"
-                                                data-seat-id="@seat.SeatId"
-                                                data-zone="@seat.SeatZone"
-                                                data-row="@seat.SeatRow"
-                                                data-number="@seat.SeatNumber"
-                                                data-price="@seat.Price"
-                                                data-status="@seat.SeatStatus"
-
-                                               @(seat.SeatStatus != 0 ? "disabled" : "")
-                                               title="@seat.SeatZone @seat.SeatRow 排 @seat.SeatNumber 號 - NT$ @seat.Price">
-                                               @seat.SeatNumber
-                                        </button>
-                                    }
-                                </div>
-                            </div>
+                            <small style="color: #6c757d; font-size: 16px;">
+                                (NT$ @Model.First().Price.ToString("N0"))
+                            </small>
                         }
-                    </div>
+                    </h4>
+
+                    @foreach (var row in seatsByRow)
+                    {
+                        <div class="seat-row" style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <span class="row-label" style="min-width: 70px; font-weight: bold; color: #495057;">@row.Key 排</span>
+                            <div class="seats-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                @{
+                                    // 座位號碼排序
+                                    var sortedRowSeats = row
+                                        .OrderBy(s => 
+                                        {
+                                            if (int.TryParse(s.SeatNumber, out int seatNum))
+                                                return seatNum;
+                                            return 999;
+                                        })
+                                        .ThenBy(s => s.SeatNumber);
+                                }
+
+                                @foreach (var seat in sortedRowSeats)
+                                {
+                                    var isMySeat = memberSeatIds.Contains(seat.SeatId);
+                                    var statusClass = isMySeat ? "my-seat" : (seat.SeatStatus == 0 ? "available" : "sold");
+
+                                    <button type="button"
+                                            class="seat-btn @statusClass"
+                                            data-seat-id="@seat.SeatId"
+                                            data-zone="@seat.SeatZone"
+                                            data-row="@seat.SeatRow"
+                                            data-number="@seat.SeatNumber"
+                                            data-price="@seat.Price"
+                                            data-status="@seat.SeatStatus"
+                                            @(seat.SeatStatus != 0 || isMySeat ? "disabled" : "")
+                                            title="@seat.SeatZone @seat.SeatRow 排 @seat.SeatNumber 號 - NT$ @seat.Price">
+                                        @seat.SeatNumber
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
-        }
+        </div>
     </div>
 </section>
-<!-- Ticket Section End -->
 
+<!-- 已選座位區 -->
+<section id="cart" style="padding: 30px 0; background-color: #f8f9fa;">
+    <div class="container">
+        <header class="section-header">
+            <h3>已選座位</h3>
+        </header>
 
-@if (remainingQuota == 0)
-{
-    <!-- 已達購票上限提示 -->
-    <section style="padding: 30px 0;">
-        <div class="container">
-            <div class="alert alert-warning" role="alert">
-                <i class="fas fa-exclamation-triangle"></i>
-                您已達到此場演唱會的購票上限（4 張）。
-            </div>
-        </div>
-    </section>
-}
-else
-{
-    <!-- Cart Section Start (改為已選座位顯示) -->
-    <section id="cart">
-        <div class="container">
-            <header class="section-header">
-                <h3>已選座位</h3>
-            </header>
-            <div class="row">
-                <div class="col-md-12">
-                    <div id="selected-seats-display" style="min-height: 60px; padding: 20px; background-color: #f8f9fa; border-radius: 5px; margin-bottom: 20px;">
-                        <span style="color: #6c757d;">尚未選擇座位</span>
-                    </div>
-                    <div class="row" style="margin-bottom: 20px;">
-                        <div class="col-md-6">
-                            <p><strong>已選數量：</strong><span id="selected-count" style="font-size: 24px; color: #007bff;">0</span> 張</p>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow">
+                    <div class="card-body" style="padding: 30px;">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5><i class="fa fa-check-circle"></i> 已選擇：<span id="selected-count" style="color: #dc3545; font-size: 24px;">0</span> / @selectedQuantity 張</h5>
+                                <div id="selected-seats-display" style="margin-top: 15px; min-height: 50px;">
+                                    <span style="color: #6c757d;">尚未選擇座位</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <h5><i class="fa fa-dollar-sign"></i> 總金額</h5>
+                                <h2 style="color: #dc3545; font-weight: bold;">NT$ <span id="total-amount">0</span></h2>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>總金額：</strong>NT$ <span id="total-amount" style="font-size: 24px; color: #28a745;">0</span></p>
+
+                        <hr />
+
+                        <div style="display: flex; justify-content: space-between;">
+                            <a href="@Url.Action("SelectQuantity", "Concert", new { concertId = concert.ConcertId, zone = selectedZone })" 
+                               class="btn btn-secondary btn-lg">
+                                <i class="fa fa-arrow-left"></i> 返回選擇張數
+                            </a>
+                            <button type="button" id="confirm-btn" class="btn btn-primary btn-lg" disabled>
+                                <i class="fa fa-shopping-cart"></i> 確認購買
+                            </button>
                         </div>
                     </div>
-                    <button id="confirm-btn" type="submit" disabled style="width: 100%; padding: 15px; font-size: 18px;">
-                        <i class="fas fa-check"></i> 確認購買
-                    </button>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- Cart Section End -->
-  
-}
+    </div>
+</section>
 
-@section MyCSS {
-    <style>
-        .seat-btn {
-            width: 50px;
-            height: 50px;
-            border: 2px solid #28a745;
-            background-color: #d4edda;
-            color: #155724;
-            border-radius: 5px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+<style>
+    .seat-btn {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #28a745;
+        background-color: #d4edda;
+        color: #000;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: bold;
+        font-size: 12px;
+    }
 
-            .seat-btn:hover:not(:disabled) {
-                transform: scale(1.1);
-                box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
-            }
+    .seat-btn.available:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+    }
 
-            .seat-btn.sold {
-                background-color: #6c757d;
-                border-color: #6c757d;
-                color: white;
-                cursor: not-allowed;
-                opacity: 0.5;
-            }
+    .seat-btn.sold {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
 
-            /* 會員已購買的座位樣式 */
-            .seat-btn.my-seat {
-                background-color: #dc3545;
-                border: 2px solid #a71d2a;
-                color: white;
-                cursor: not-allowed;
-                opacity: 1;
-                font-weight: bold;
-            }
+    .seat-btn.my-seat {
+        background-color: #dc3545;
+        border: 2px solid #a71d2a;
+        color: white;
+        cursor: not-allowed;
+        opacity: 1;
+        font-weight: bold;
+    }
 
-                .seat-btn.my-seat:hover {
-                    transform: scale(1.05);
-                    box-shadow: 0 0 15px rgba(220, 53, 69, 0.6);
-                }
+    .seat-btn.my-seat:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.6);
+    }
 
+    .seat-btn.selected {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #000;
+        transform: scale(1.1);
+    }
 
+    .selected-seat-tag {
+        display: inline-block;
+        background-color: #ffc107;
+        color: #000;
+        padding: 8px 15px;
+        margin: 5px;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+    }
 
-            .seat-btn.selected {
-                background-color: #ffc107;
-                border-color: #ffc107;
-                color: #000;
-                transform: scale(1.1);
-            }
+    #confirm-btn {
+        background: linear-gradient(to right, #007bff, #0056b3);
+        border: none;
+        color: white;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
 
-        .selected-seat-tag {
-            display: inline-block;
-            background-color: #ffc107;
-            color: #000;
-            padding: 8px 15px;
-            margin: 5px;
-            border-radius: 5px;
-            font-size: 14px;
-            font-weight: bold;
-        }
+    #confirm-btn:hover:not(:disabled) {
+        background: linear-gradient(to right, #0056b3, #003d82);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+    }
 
-        #confirm-btn {
-            background: linear-gradient(to right, #007bff, #0056b3);
-            border: none;
-            color: white;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
+    #confirm-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
 
-            #confirm-btn:hover:not(:disabled) {
-                background: linear-gradient(to right, #0056b3, #003d82);
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
-            }
+    .single-ticket {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
 
-            #confirm-btn:disabled {
-                background: #6c757d;
-                cursor: not-allowed;
-                opacity: 0.6;
-            }
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        const maxSeats = @selectedQuantity;
+        const concertId = '@concert.ConcertId';
+        let selectedSeats = [];
 
-        .single-ticket {
-            border: 1px solid #dee2e6;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+        // 點擊座位
+        $('.seat-btn.available').click(function() {
+            const seatId = $(this).data('seat-id');
+            const zone = $(this).data('zone');
+            const row = $(this).data('row');
+            const number = $(this).data('number');
+            const price = parseFloat($(this).data('price'));
 
-        .card {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: none;
-        }
-    </style>
-}
-
-@section MyJS {
-    <script>
-        $(document).ready(function() {
-            const maxSeats = @remainingQuota;
-            const concertId = '@concert.ConcertId';
-            let selectedSeats = [];
-
-            // 點擊座位
-            $('.seat-btn.available').click(function() {
-                const seatId = $(this).data('seat-id');
-                const zone = $(this).data('zone');
-                const row = $(this).data('row');
-                const number = $(this).data('number');
-                const price = parseFloat($(this).data('price'));
-
-                if ($(this).hasClass('selected')) {
-                    // 取消選擇
-                    $(this).removeClass('selected');
-                    selectedSeats = selectedSeats.filter(s => s.seatId !== seatId);
-                } else {
-                    // 檢查是否超過限制
-                    if (selectedSeats.length >= maxSeats) {
-                        alert(`最多只能選擇 ${maxSeats} 個座位`);
-                        return;
-                    }
-
-                    // 選擇座位
-                    $(this).addClass('selected');
-                    selectedSeats.push({ seatId, zone, row, number, price });
-                }
-
-                updateDisplay();
-            });
-
-            // 更新顯示
-            function updateDisplay() {
-                const count = selectedSeats.length;
-                const total = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
-
-                // 更新數量和金額
-                $('#selected-count').text(count);
-                $('#total-amount').text(total.toFixed(0));
-
-                // 更新已選座位顯示
-                if (count === 0) {
-                    $('#selected-seats-display').html('<span style="color: #6c757d;">尚未選擇座位</span>');
-                    $('#confirm-btn').prop('disabled', true);
-                } else {
-                    const seatsHtml = selectedSeats.map(seat =>
-                        `<span class="selected-seat-tag">
-                            ${seat.zone} ${seat.row}排 ${seat.number}號
-                        </span>`
-                    ).join('');
-                    $('#selected-seats-display').html(seatsHtml);
-                    $('#confirm-btn').prop('disabled', false);
-                }
-            }
-
-            // 確認購買
-            $('#confirm-btn').click(function() {
-                if (selectedSeats.length === 0) {
-                    alert('請選擇座位');
+            if ($(this).hasClass('selected')) {
+                // 取消選擇
+                $(this).removeClass('selected');
+                selectedSeats = selectedSeats.filter(s => s.seatId !== seatId);
+            } else {
+                // 檢查是否超過限制
+                if (selectedSeats.length >= maxSeats) {
+                    alert(`請選擇 ${maxSeats} 個座位`);
                     return;
                 }
 
-                const totalAmount = selectedSeats.reduce((sum, s) => sum + s.price, 0);
-                const seatsList = selectedSeats.map(s => `${s.zone} ${s.row}排 ${s.number}號`).join('\n');
+                // 選擇座位
+                $(this).addClass('selected');
+                selectedSeats.push({ seatId, zone, row, number, price });
+            }
 
-                if (!confirm(`確定要購買 ${selectedSeats.length} 張票嗎？\n\n座位：\n${seatsList}\n\n總金額：NT$ ${totalAmount}`)) {
-                    return;
-                }
-
-                const seatIds = selectedSeats.map(s => s.seatId);
-
-                $.ajax({
-                    url: '@Url.Action("CreateOrder", "Concert")',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        concertId: concertId,
-                        selectedSeats: seatIds
-                    }),
-                    success: function(response) {
-                        if (response.success) {
-                            alert(response.message);
-                            window.location.href = '@Url.Action("Index", "Home")';
-                        } else {
-                            alert(response.message);
-                            // 如果座位已被購買，重新載入頁面
-                            if (response.message.includes('已被購買')) {
-                                location.reload();
-                            }
-                        }
-                    },
-                    error: function() {
-                        alert('訂單建立失敗，請稍後再試');
-                    }
-                });
-            });
-
-            // 每30秒檢查一次座位狀態（防止其他人同時購買）
-            setInterval(function() {
-                $.get('@Url.Action("CheckSeatStatus", "Concert")?concertId=' + concertId, function(seats) {
-                    seats.forEach(function(seat) {
-                        const $btn = $(`.seat-btn[data-seat-id="${seat.seatId}"]`);
-                        if (seat.status === 1 && !$btn.hasClass('sold') && !$btn.hasClass('my-seat')) {
-                            $btn.removeClass('available selected')
-                                .addClass('sold')
-                                .prop('disabled', true);
-
-                            // 如果這個座位在已選清單中，移除它
-                            selectedSeats = selectedSeats.filter(s => s.seatId !== seat.seatId);
-                            updateDisplay();
-                        }
-                    });
-                });
-            }, 30000); // 30秒
+            updateDisplay();
         });
-    </script>
-}
+
+        // 更新顯示
+        function updateDisplay() {
+            const count = selectedSeats.length;
+            const total = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
+
+            // 更新數量和金額
+            $('#selected-count').text(count);
+            $('#total-amount').text(total.toFixed(0));
+
+            // 更新已選座位顯示
+            if (count === 0) {
+                $('#selected-seats-display').html('<span style="color: #6c757d;">尚未選擇座位</span>');
+                $('#confirm-btn').prop('disabled', true);
+            } else {
+                const seatsHtml = selectedSeats.map(seat =>
+                    `<span class="selected-seat-tag">
+                        ${seat.zone} ${seat.row}排 ${seat.number}號
+                    </span>`
+                ).join('');
+                $('#selected-seats-display').html(seatsHtml);
+                
+                // 只有選擇正確數量才能確認
+                $('#confirm-btn').prop('disabled', count !== maxSeats);
+            }
+        }
+
+        // 確認購買
+        $('#confirm-btn').click(function() {
+            if (selectedSeats.length !== maxSeats) {
+                alert(`請選擇 ${maxSeats} 個座位`);
+                return;
+            }
+
+            const totalAmount = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+            const seatsList = selectedSeats.map(s => `${s.zone} ${s.row}排 ${s.number}號`).join('\n');
+
+            if (!confirm(`確定要購買 ${selectedSeats.length} 張票嗎？\n\n座位：\n${seatsList}\n\n總金額：NT$ ${totalAmount.toLocaleString()}`)) {
+                return;
+            }
+
+            const seatIds = selectedSeats.map(s => s.seatId);
+
+            $.ajax({
+                url: '@Url.Action("CreateOrder", "Concert")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    concertId: concertId,
+                    selectedSeats: seatIds
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        window.location.href = '@Url.Action("OrderDetail", "Member")?orderId=' + response.orderId;
+                    } else {
+                        alert(response.message);
+                        if (response.message.includes('已被購買')) {
+                            location.reload();
+                        }
+                    }
+                },
+                error: function() {
+                    alert('訂單建立失敗，請稍後再試');
+                }
+            });
+        });
+
+        // 每30秒檢查座位狀態
+        setInterval(function() {
+            $.get('@Url.Action("CheckSeatStatus", "Concert")?concertId=' + concertId + '&zone=' + encodeURIComponent('@selectedZone'), function(seats) {
+                seats.forEach(function(seat) {
+                    const $btn = $(`.seat-btn[data-seat-id="${seat.seatId}"]`);
+                    if (seat.status === 1 && !$btn.hasClass('sold') && !$btn.hasClass('my-seat')) {
+                        $btn.removeClass('available selected')
+                            .addClass('sold')
+                            .prop('disabled', true);
+
+                        selectedSeats = selectedSeats.filter(s => s.seatId !== seat.seatId);
+                        updateDisplay();
+                    }
+                });
+            });
+        }, 30000);
+    });
+</script>

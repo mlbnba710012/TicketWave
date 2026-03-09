@@ -1,8 +1,87 @@
 /* ================================================= */
 /* ------------------ General CSS ------------------ */
 /* ================================================= */
+/* ===== Topbar (會員列) ===== */
+#topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px; /* 你可調整 */
+    background-color: dimgray; /* 想像KKTIX可換成綠色 */
+    z-index: 999;
+}
+
+    #topbar .topbar-inner {
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    #topbar .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #topbar .topbar-text {
+        color: #fff;
+    }
+
+/* ================================================= */
+/* ------------------ Header CSS ------------------- */
+/* ================================================= */
+
+#header {
+    top: 44px; /* 等於 topbar 高度 */
+    padding: 30px 0;
+    height: 92px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    transition: all 0.5s;
+    z-index: 997;
+    background-color: dimgray; /* 加這行 */
+}
+
+    #header.header-scrolled {
+        background: rgba(0, 0, 0, 0.35);
+        padding: 10px 0;
+        height: 72px;
+        transition: all 0.5s;
+    }
+
+    #header #logo {
+        float: left;
+    }
+
+        #header #logo h1 {
+            margin: 0;
+            padding: 0;
+            line-height: 1;
+        }
+
+            #header #logo h1 a {
+                font-family: 'Roboto', sans-serif;
+                font-size: 45px;
+                font-weight: 300;
+                letter-spacing: -1px;
+            }
+
+                #header #logo h1 a:hover {
+                    color: #fff;
+                }
+
+        #header #logo img {
+            padding: 0;
+            margin: 0;
+            max-height: 50px;
+        }
+
 
 body {
+    padding-top: calc(44px + 92px);
     color: #666;
     font-family: 'Roboto', sans-serif;
     font-weight: 400;
@@ -70,7 +149,7 @@ h6 {
 /* ------------------ Header CSS ------------------- */
 /* ================================================= */
 
-#header {
+/*#header {
     padding: 30px 0;
     height: 92px;
     position: fixed;
@@ -82,7 +161,7 @@ h6 {
 }
 
 #header.header-scrolled {
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.15);
     padding: 10px 0;
     height: 72px;
     transition: all 0.5s;
@@ -113,153 +192,90 @@ h6 {
     padding: 0;
     margin: 0;
     max-height: 50px;
-}
+}*/
 
 /* ================================================= */
 /* ----------------- Intro Section ----------------- */
 /* ================================================= */
 
+/* Intro 不要固定高度，讓內容撐開 */
 #intro {
-    display: table;
-    width: 100%;
-    height: 100vh;
-    background: #000;
+    background: #8f6670;
+    padding: 20px 0; /* 上下留點呼吸 */
 }
 
-#intro .carousel-item {
-    width: 100%;
-    height: 100vh;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    /* item 用 flex 置中，但不固定高度 */
+    #intro .carousel-item {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 0;
+    }
+
+        /* 圖片完整顯示：寬度限制、保持比例 */
+        #intro .carousel-item > img {
+            width: min(1100px, 100%); /* 中間海報最大寬度，可調 1000/1200 */
+            height: auto; /* ? 關鍵：高度跟著比例走 */
+            object-fit: contain;
+            display: block;
+        }
+
+        /* 關掉遮罩避免變暗 */
+        #intro .carousel-item::before {
+            display: none;
+        }
+
+/* 2) 背景色（左右留空的顏色） */
+#intro {
+    background: #8f6670; /* 自己換成你想要的底色 */
 }
 
-#intro .carousel-item::before {
-    content: '';
-    background-color: rgba(0, 0, 0, 0.7);
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-}
+    /* 3) 每張輪播用 flex 把圖片置中 */
+    #intro .carousel-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+    }
 
-#intro .carousel-container {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-    -ms-flex-pack: center;
-    justify-content: center;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-    -ms-flex-align: center;
-    align-items: center;
-    position: absolute;
-    bottom: 0;
-    top: 0;
-    left: 0;
-    right: 0;
-}
+        /* 4) 圖片「完整顯示」不裁切 */
+        #intro .carousel-item > img {
+            max-height: 100%; /* 高度最多等於 container */
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
 
-#intro .carousel-background img {
-    max-width: 100%;
-}
+    /* 5) 你的文字/按鈕要疊在圖上：維持 absolute */
+    #intro .carousel-container {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-#intro .carousel-content {
-    text-align: center;
-}
+    /* 6) 箭頭置中在左右留白區 */
+    #intro .carousel-control-prev,
+    #intro .carousel-control-next {
+        width: 15%;
+    }
 
-#intro h2 {
-    color: #fff;
-    margin-bottom: 30px;
-    font-size: 64px;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
-
-#intro p {
-    width: 80%;
-    margin: 0 auto 30px auto;
-    color: #fff;
-}
-
-#intro .carousel-fade {
-    overflow: hidden;
-}
-
-#intro .carousel-fade .carousel-inner .carousel-item {
-    transition-property: opacity;
-}
-
-#intro .carousel-fade .carousel-inner .carousel-item,
-#intro .carousel-fade .carousel-inner .active.carousel-item-left,
-#intro .carousel-fade .carousel-inner .active.carousel-item-right {
-    opacity: 0;
-}
-
-#intro .carousel-fade .carousel-inner .active,
-#intro .carousel-fade .carousel-inner .carousel-item-next.carousel-item-left,
-#intro .carousel-fade .carousel-inner .carousel-item-prev.carousel-item-right {
-    opacity: 1;
-    transition: 0.5s;
-}
-
-#intro .carousel-fade .carousel-inner .carousel-item-next,
-#intro .carousel-fade .carousel-inner .carousel-item-prev,
-#intro .carousel-fade .carousel-inner .active.carousel-item-left,
-#intro .carousel-fade .carousel-inner .active.carousel-item-right {
-    left: 0;
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-}
-
-#intro .carousel-control-prev,
-#intro .carousel-control-next {
-    width: 10%;
-}
-
-#intro .carousel-control-next-icon,
-#intro .carousel-control-prev-icon {
-    width: 50px;
-    height: 50px;
-    padding: 9px;
-    background: #D2691E;
-    font-size: 32px;
-    line-height: 1;
-}
-
-#intro .carousel-indicators li {
-    cursor: pointer;
-}
-
-#intro .btn-get-started {
-    font-weight: 400;
-    font-size: 16px;
-    letter-spacing: 1px;
-    display: inline-block;
-    padding: 8px 32px;
-    transition: 0.5s;
-    margin: 10px;
-    color: #ffffff;
-    background: #D2691E;
-}
-
-#intro .btn-get-started:hover {
-    background: #ffffff;
-    color: #D2691E;
-}
+    #intro .carousel-control-prev-icon,
+    #intro .carousel-control-next-icon {
+        width: 48px;
+        height: 48px;
+    }
 
 /* ================================================= */
 /* ---------------- Banner Section ----------------- */
 /* ================================================= */
 
 .banner {
-    background: url("../img/page-bg.jpg") center top no-repeat;
+/*    background: url("../img/page-bg.jpg") center top no-repeat;*/
+    background: url("../img/concert-bg.png") center top no-repeat;
     background-size: cover;
     padding: 200px 0 25px 0;
     position: relative;
@@ -334,7 +350,7 @@ h6 {
     position: relative;
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 449.98px) {
     .concert {
         padding: 120px 0 25px 0;
     }
