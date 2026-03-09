@@ -135,7 +135,7 @@
         <!-- 登入標題 -->
         <div class="login-header">
             <div class="icon-wrapper">
-                <i class="fas fa-ticket-alt"></i>
+                <i class="fa fa-ticket-alt"></i>
             </div>
             <h2>TicketWave</h2>
             <p>後台管理系統</p>
@@ -147,7 +147,7 @@
             @if (!ViewData.ModelState.IsValid)
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <i class="fa fa-exclamation-circle me-2"></i>
                     @Html.ValidationSummary(false, "", new { @class = "mb-0" })
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -159,11 +159,11 @@
                 <!-- 帳號 -->
                 <div class="mb-3">
                     <label for="username" class="form-label">
-                        <i class="fas fa-user me-1"></i> 管理員帳號
+                        <i class="fa fa-user me-1"></i> 管理員帳號
                     </label>
                     <div class="input-group">
                         <span class="input-group-text">
-                            <i class="fas fa-user"></i>
+                            <i class="fa fa-user"></i>
                         </span>
                         <input type="text"
                                class="form-control"
@@ -179,11 +179,11 @@
                 <!-- 密碼 -->
                 <div class="mb-3">
                     <label for="password" class="form-label">
-                        <i class="fas fa-lock me-1"></i> 密碼
+                        <i class="fa fa-lock me-1"></i> 密碼
                     </label>
                     <div class="input-group">
                         <span class="input-group-text">
-                            <i class="fas fa-lock"></i>
+                            <i class="fa fa-lock"></i>
                         </span>
                         <input type="password"
                                class="form-control"
@@ -197,14 +197,14 @@
 
                 <!-- 登入按鈕 -->
                 <button type="submit" class="btn btn-login">
-                    <i class="fas fa-sign-in-alt me-2"></i> 登入
+                    <i class="fa fa-sign-in-alt me-2"></i> 登入
                 </button>
             </form>
 
             <!-- 提示訊息 -->
             <div class="text-center mt-4">
                 <small class="text-muted">
-                    <i class="fas fa-info-circle"></i>
+                    <i class="fa fa-info-circle"></i>
                     預設帳號：admin / 密碼：admin123
                 </small>
             </div>
@@ -212,7 +212,7 @@
 
         <!-- 頁尾 -->
         <div class="login-footer">
-            <i class="fas fa-shield-alt me-1"></i>
+            <i class="fa fa-shield-alt me-1"></i>
             TicketWave 後台管理系統 &copy; 2026
         </div>
     </div>

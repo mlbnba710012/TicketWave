@@ -7,14 +7,14 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-md-8">
-            <h2><i class="fas fa-music me-2"></i> 演唱會詳情</h2>
+            <h2><i class="fa fa-music me-2"></i> 演唱會詳情</h2>
         </div>
         <div class="col-md-4 text-end">
             <a asp-action="Edit" asp-route-id="@Model.ConcertId" class="btn btn-warning">
-                <i class="fas fa-edit"></i> 編輯
+                <i class="fa fa-edit"></i> 編輯
             </a>
             <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> 返回列表
+                <i class="fa fa-arrow-left"></i> 返回列表
             </a>
         </div>
     </div>
@@ -24,7 +24,7 @@
         <div class="col-lg-8">
             <div class="card mb-4">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> 基本資訊</h5>
+                    <h5 class="mb-0"><i class="fa fa-info-circle me-2"></i> 基本資訊</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless">
@@ -39,7 +39,7 @@
                         <tr>
                             <th>演出日期時間</th>
                             <td>
-                                <i class="fas fa-calendar-alt text-muted me-2"></i>
+                                <i class="fa fa-calendar-alt text-muted me-2"></i>
                                 @Model.PerformanceDate.ToString("yyyy年MM月dd日 HH:mm")
                             </td>
                         </tr>
@@ -50,7 +50,7 @@
                         <tr>
                             <th>場館地址</th>
                             <td>
-                                <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                <i class="fa fa-map-marker-alt text-muted me-2"></i>
                                 @Model.VenueAddress
                             </td>
                         </tr>
@@ -84,21 +84,21 @@
             <!-- 售票資訊 -->
             <div class="card mb-4">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-ticket-alt me-2"></i> 售票資訊</h5>
+                    <h5 class="mb-0"><i class="fa fa-ticket-alt me-2"></i> 售票資訊</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless">
                         <tr>
                             <th style="width: 150px;">開始售票時間</th>
                             <td>
-                                <i class="fas fa-clock text-success me-2"></i>
+                                <i class="fa fa-clock text-success me-2"></i>
                                 @Model.SaleStartDate.ToString("yyyy/MM/dd HH:mm")
                             </td>
                         </tr>
                         <tr>
                             <th>結束售票時間</th>
                             <td>
-                                <i class="fas fa-clock text-danger me-2"></i>
+                                <i class="fa fa-clock text-danger me-2"></i>
                                 @Model.SaleEndDate.ToString("yyyy/MM/dd HH:mm")
                             </td>
                         </tr>
@@ -111,7 +111,7 @@
             {
                 <div class="card mb-4">
                     <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="fas fa-align-left me-2"></i> 演唱會描述</h5>
+                        <h5 class="mb-0"><i class="fa fa-align-left me-2"></i> 演唱會描述</h5>
                     </div>
                     <div class="card-body">
                         <p class="mb-0">@Model.Description</p>
@@ -124,7 +124,7 @@
             {
                 <div class="card">
                     <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="fas fa-image me-2"></i> 演唱會海報</h5>
+                        <h5 class="mb-0"><i class="fa fa-image me-2"></i> 演唱會海報</h5>
                     </div>
                     <div class="card-body text-center">
                         <img src="@Model.PosterImageUrl" alt="@Model.ConcertName" class="img-fluid" style="max-height: 500px;">
@@ -138,7 +138,7 @@
             <!-- 座位統計 -->
             <div class="card mb-4">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-chair me-2"></i> 座位統計</h5>
+                    <h5 class="mb-0"><i class="fa fa-chair me-2"></i> 座位統計</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -148,13 +148,13 @@
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>
-                                <i class="fas fa-check-circle text-success"></i> 可購買
+                                <i class="fa fa-check-circle text-success"></i> 可購買
                             </span>
                             <strong class="text-success">@ViewBag.AvailableSeats</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>
-                                <i class="fas fa-shopping-cart text-danger"></i> 已售出
+                                <i class="fa fa-shopping-cart text-danger"></i> 已售出
                             </span>
                             <strong class="text-danger">@ViewBag.SoldSeats</strong>
                         </div>
@@ -162,7 +162,7 @@
                         {
                             <div class="d-flex justify-content-between mb-2">
                                 <span>
-                                    <i class="fas fa-lock text-warning"></i> 保留中
+                                    <i class="fa fa-lock text-warning"></i> 保留中
                                 </span>
                                 <strong class="text-warning">@ViewBag.ReservedSeats</strong>
                             </div>
@@ -171,7 +171,7 @@
                         {
                             <div class="d-flex justify-content-between mb-2">
                                 <span>
-                                    <i class="fas fa-ban text-secondary"></i> 已鎖定
+                                    <i class="fa fa-ban text-secondary"></i> 已鎖定
                                 </span>
                                 <strong class="text-secondary">@ViewBag.LockedSeats</strong>
                             </div>
@@ -203,7 +203,7 @@
             <!-- 訂單統計 -->
             <div class="card mb-4">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i> 訂單統計</h5>
+                    <h5 class="mb-0"><i class="fa fa-shopping-cart me-2"></i> 訂單統計</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -216,7 +216,7 @@
             <!-- 系統資訊 -->
             <div class="card">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-cog me-2"></i> 系統資訊</h5>
+                    <h5 class="mb-0"><i class="fa fa-cog me-2"></i> 系統資訊</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm table-borderless mb-0">
@@ -248,13 +248,13 @@
     <div class="row mt-4">
         <div class="col-12">
             <a asp-action="Edit" asp-route-id="@Model.ConcertId" class="btn btn-warning">
-                <i class="fas fa-edit"></i> 編輯演唱會
+                <i class="fa fa-edit"></i> 編輯演唱會
             </a>
             <a asp-action="Delete" asp-route-id="@Model.ConcertId" class="btn btn-danger">
-                <i class="fas fa-trash"></i> 刪除演唱會
+                <i class="fa fa-trash"></i> 刪除演唱會
             </a>
             <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-list"></i> 返回列表
+                <i class="fa fa-list"></i> 返回列表
             </a>
         </div>
     </div>

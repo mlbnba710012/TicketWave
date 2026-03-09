@@ -7,7 +7,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <h2 class="mb-0">
-                <i class="fas fa-tachometer-alt me-2"></i> 儀表板
+                <i class="fa fa-tachometer-alt me-2"></i> 儀表板
             </h2>
             <p class="text-muted">歡迎回來，@Context.Session.GetString("AdminUsername")！</p>
         </div>
@@ -24,7 +24,7 @@
                         <h2 class="mb-0">@ViewBag.TotalMembers</h2>
                     </div>
                     <div>
-                        <i class="fas fa-users fa-3x opacity-50"></i>
+                        <i class="fa fa-users fa-3x opacity-50"></i>
                     </div>
                 </div>
             </div>
@@ -39,7 +39,7 @@
                         <h2 class="mb-0">@ViewBag.TotalConcerts</h2>
                     </div>
                     <div>
-                        <i class="fas fa-music fa-3x opacity-50"></i>
+                        <i class="fa fa-music fa-3x opacity-50"></i>
                     </div>
                 </div>
             </div>
@@ -54,7 +54,7 @@
                         <h2 class="mb-0">@ViewBag.TotalOrders</h2>
                     </div>
                     <div>
-                        <i class="fas fa-shopping-cart fa-3x opacity-50"></i>
+                        <i class="fa fa-shopping-cart fa-3x opacity-50"></i>
                     </div>
                 </div>
             </div>
@@ -69,7 +69,7 @@
                         <h2 class="mb-0">$@ViewBag.TotalRevenue.ToString("N0")</h2>
                     </div>
                     <div>
-                        <i class="fas fa-dollar-sign fa-3x opacity-50"></i>
+                        <i class="fa fa-dollar-sign fa-3x opacity-50"></i>
                     </div>
                 </div>
             </div>
@@ -82,20 +82,20 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-calendar-day me-2"></i> 今日統計
+                        <i class="fa fa-calendar-day me-2"></i> 今日統計
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <p class="mb-2">
-                                <i class="fas fa-shopping-cart text-primary me-2"></i>
+                                <i class="fa fa-shopping-cart text-primary me-2"></i>
                                 <strong>今日訂單：</strong> @ViewBag.TodayOrders 筆
                             </p>
                         </div>
                         <div class="col-md-6">
                             <p class="mb-2">
-                                <i class="fas fa-dollar-sign text-success me-2"></i>
+                                <i class="fa fa-dollar-sign text-success me-2"></i>
                                 <strong>今日營收：</strong> $@ViewBag.TodayRevenue.ToString("N0")
                             </p>
                         </div>
@@ -111,7 +111,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i> 最新訂單（前 10 筆）
+                        <i class="fa fa-list me-2"></i> 最新訂單（前 10 筆）
                     </h5>
                 </div>
                 <div class="card-body">
@@ -169,7 +169,7 @@
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-fire me-2"></i> 熱門演唱會（前 5 名）
+                        <i class="fa fa-fire me-2"></i> 熱門演唱會（前 5 名）
                     </h5>
                 </div>
                 <div class="card-body">

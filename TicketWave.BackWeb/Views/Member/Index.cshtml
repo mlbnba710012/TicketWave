@@ -7,7 +7,7 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
-            <h2><i class="fas fa-users me-2"></i> 會員管理</h2>
+            <h2><i class="fa fa-users me-2"></i> 會員管理</h2>
         </div>
     </div>
 
@@ -25,7 +25,7 @@
                                placeholder="搜尋姓名、Email、電話、身分證..."
                                value="@ViewBag.SearchTerm">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> 搜尋
+                            <i class="fa fa-search"></i> 搜尋
                         </button>
                     </form>
                 </div>
@@ -42,7 +42,7 @@
                                 <th>Email</th>
                                 <th>電話</th>
                                 <th>身分證字號</th>
-                                <th>註冊日期</th>
+                                <th></th>
                                 <th>操作</th>
                             </tr>
                         </thead>
@@ -57,7 +57,7 @@
                                     @* <td>@member.RegisterDate.ToString("yyyy/MM/dd")</td> *@
                                     <td>
                                         <a asp-action="Details" asp-route-id="@member.MemberId" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i> 詳情
+                                            <i class="fa fa-eye"></i> 詳情
                                         </a>
                                     </td>
                                 </tr>
@@ -73,7 +73,7 @@
             else
             {
                 <div class="text-center py-5">
-                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <i class="fa fa-users fa-3x text-muted mb-3"></i>
                     <p class="text-muted">
                         @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
                         {

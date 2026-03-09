@@ -17,9 +17,9 @@ namespace TicketWave.Web.Controllers
         private readonly IMemberService _memberService;
         private readonly ILogger<MemberController> _logger;
         private readonly IMapper _mapper;
-        private readonly MemberDbContext _dbContext;
+        private readonly TicketWaveContext _dbContext;
         private readonly IOrderService _orderService;
-        public MemberController(IMemberService memberService, ILogger<MemberController> logger, IMapper mapper, MemberDbContext dbContext, IOrderService orderService)
+        public MemberController(IMemberService memberService, ILogger<MemberController> logger, IMapper mapper, TicketWaveContext dbContext, IOrderService orderService)
         {
             _memberService = memberService;
             _logger = logger;

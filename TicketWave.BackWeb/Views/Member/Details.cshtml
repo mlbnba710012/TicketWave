@@ -1,4 +1,11 @@
-﻿@* @model TicketWave.Repository.Entity.Member
+﻿@model TicketWave.Repository.Entity.Member
+@using TicketWave.Repository.Entity
+
+@* @model TicketWave.BackWeb.ViewModels.MemberDetailsViewModel *@
+
+@{
+    var orders = ViewBag.Orders as List<Order> ?? new List<Order>();
+}
 
 @{
     ViewData["Title"] = "會員詳情";
@@ -7,11 +14,11 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-md-8">
-            <h2><i class="fas fa-user me-2"></i> 會員詳情</h2>
+            <h2><i class="fa fa-user me-2"></i> 會員詳情</h2>
         </div>
         <div class="col-md-4 text-end">
             <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> 返回列表
+                <i class="fa fa-arrow-left"></i> 返回列表
             </a>
         </div>
     </div>
@@ -21,7 +28,7 @@
         <div class="col-lg-6">
             <div class="card mb-4">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-id-card me-2"></i> 基本資訊</h5>
+                    <h5 class="mb-0"><i class="fa fa-id-card me-2"></i> 基本資訊</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless">
@@ -38,14 +45,14 @@
                         <tr>
                             <th>Email</th>
                             <td>
-                                <i class="fas fa-envelope text-muted me-2"></i>
+                                <i class="fa fa-envelope text-muted me-2"></i>
                                 @Model.Email
                             </td>
                         </tr>
                         <tr>
                             <th>電話</th>
                             <td>
-                                <i class="fas fa-phone text-muted me-2"></i>
+                                <i class="fa fa-phone text-muted me-2"></i>
                                 @(Model.Phone ?? "-")
                             </td>
                         </tr>
@@ -56,14 +63,14 @@
                         <tr>
                             <th>生日</th>
                             <td>
-                                <i class="fas fa-birthday-cake text-muted me-2"></i>
+                                <i class="fa fa-birthday-cake text-muted me-2"></i>
                                 @(Model.BirthDate ?? "-")
                             </td>
                         </tr>
                         <tr>
                             <th>地址</th>
                             <td>
-                                <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                <i class="fa fa-map-marker-alt text-muted me-2"></i>
                                 @(Model.Address ?? "-")
                             </td>
                         </tr>
@@ -84,7 +91,7 @@
         <div class="col-lg-6">
             <div class="card mb-4">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i> 消費統計</h5>
+                    <h5 class="mb-0"><i class="fa fa-chart-bar me-2"></i> 消費統計</h5>
                 </div>
                 <div class="card-body">
                     <div class="row text-center">
@@ -113,10 +120,11 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i> 訂單記錄</h5>
+                    <h5 class="mb-0"><i class="fa fa-shopping-cart me-2"></i> 訂單記錄</h5>
                 </div>
                 <div class="card-body">
-                    @if (Model.Orders != null && Model.Orders.Any())
+                    @*if (Model.Orders != null && Model.Orders.Any())*@
+                     @if (orders.Any())
                     {
                         <div class="table-responsive">
                             <table class="table table-hover">
@@ -132,7 +140,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var order in Model.Orders.OrderByDescending(o => o.CreateDate))
+                                    @*foreach (var order in Model.Orders.OrderByDescending(o => o.CreateDate))*@
+                                    @foreach (var order in orders.OrderByDescending(o => o.CreateDate))
                                     {
                                         <tr>
                                             <td><small class="font-monospace">@order.OrderNumber</small></td>
@@ -177,7 +186,7 @@
                     else
                     {
                         <div class="text-center py-5">
-                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <i class="fa fa-shopping-cart fa-3x text-muted mb-3"></i>
                             <p class="text-muted mb-0">該會員尚未有任何訂單記錄</p>
                         </div>
                     }
@@ -190,8 +199,8 @@
     <div class="row mt-4">
         <div class="col-12">
             <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-list"></i> 返回列表
+                <i class="fa fa-list"></i> 返回列表
             </a>
         </div>
     </div>
-</div> *@
+</div>

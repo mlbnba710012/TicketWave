@@ -7,11 +7,11 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-md-8">
-            <h2><i class="fas fa-shopping-cart me-2"></i> 訂單詳情</h2>
+            <h2><i class="fa fa-shopping-cart me-2"></i> 訂單詳情</h2>
         </div>
         <div class="col-md-4 text-end">
             <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> 返回列表
+                <i class="fa fa-arrow-left"></i> 返回列表
             </a>
         </div>
     </div>
@@ -23,7 +23,7 @@
             <div class="card mb-4">
                 <div class="card-header bg-white">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i> 訂單資訊</h5>
+                        <h5 class="mb-0"><i class="fa fa-file-invoice me-2"></i> 訂單資訊</h5>
                         @if (Model.OrderStatus == 0)
                         {
                             <span class="badge bg-warning text-dark">未付款</span>
@@ -73,7 +73,7 @@
                         <tr>
                             <th>訂購時間</th>
                             <td>
-                                <i class="fas fa-clock text-muted me-2"></i>
+                                <i class="fa fa-clock text-muted me-2"></i>
                                 @Model.CreateDate.ToString("yyyy年MM月dd日 HH:mm:ss")
                             </td>
                         </tr>
@@ -82,7 +82,7 @@
                             <td>
                                 @if (Model.OrderStatus == 1)
                                 {
-                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <i class="fa fa-check-circle text-success me-2"></i>
                                     @Model.UpdateDate.ToString("yyyy年MM月dd日 HH:mm:ss")
                                 }
                                 else
@@ -102,7 +102,7 @@
             <!-- 會員資訊 -->
             <div class="card mb-4">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-user me-2"></i> 會員資訊</h5>
+                    <h5 class="mb-0"><i class="fa fa-user me-2"></i> 會員資訊</h5>
                 </div>
                 <div class="card-body">
                     @if (Model.Member != null)
@@ -115,14 +115,14 @@
                             <tr>
                                 <th>Email</th>
                                 <td>
-                                    <i class="fas fa-envelope text-muted me-2"></i>
+                                    <i class="fa fa-envelope text-muted me-2"></i>
                                     @Model.Member.Email
                                 </td>
                             </tr>
                             <tr>
                                 <th>電話</th>
                                 <td>
-                                    <i class="fas fa-phone text-muted me-2"></i>
+                                    <i class="fa fa-phone text-muted me-2"></i>
                                     @(Model.Member.Phone ?? "-")
                                 </td>
                             </tr>
@@ -138,7 +138,7 @@
             <!-- 訂單明細 -->
             <div class="card">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-list me-2"></i> 訂單明細</h5>
+                    <h5 class="mb-0"><i class="fa fa-list me-2"></i> 訂單明細</h5>
                 </div>
                 <div class="card-body">
                     @if (Model.OrderDetails != null && Model.OrderDetails.Any())
@@ -197,7 +197,7 @@
                     else
                     {
                         <div class="text-center py-5">
-                            <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                            <i class="fa fa-ticket-alt fa-3x text-muted mb-3"></i>
                             <p class="text-muted mb-0">此訂單沒有明細資料</p>
                         </div>
                     }
@@ -210,13 +210,13 @@
             <!-- 訂單狀態卡片 -->
             <div class="card mb-4">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> 訂單狀態</h5>
+                    <h5 class="mb-0"><i class="fa fa-info-circle me-2"></i> 訂單狀態</h5>
                 </div>
                 <div class="card-body text-center">
                     @if (Model.OrderStatus == 0)
                     {
                         <div class="mb-3">
-                            <i class="fas fa-hourglass-half fa-4x text-warning"></i>
+                            <i class="fa fa-hourglass-half fa-4x text-warning"></i>
                         </div>
                         <h5 class="text-warning">待付款</h5>
                         <p class="text-muted mb-0">訂單已建立，等待會員付款</p>
@@ -224,7 +224,7 @@
                     else if (Model.OrderStatus == 1)
                     {
                         <div class="mb-3">
-                            <i class="fas fa-check-circle fa-4x text-success"></i>
+                            <i class="fa fa-check-circle fa-4x text-success"></i>
                         </div>
                         <h5 class="text-success">已付款</h5>
                         <p class="text-muted mb-0">付款成功，票券已生效</p>
@@ -232,7 +232,7 @@
                     else if (Model.OrderStatus == 2)
                     {
                         <div class="mb-3">
-                            <i class="fas fa-times-circle fa-4x text-danger"></i>
+                            <i class="fa fa-times-circle fa-4x text-danger"></i>
                         </div>
                         <h5 class="text-danger">已取消</h5>
                         <p class="text-muted mb-0">訂單已被取消</p>
@@ -240,7 +240,7 @@
                     else if (Model.OrderStatus == 3)
                     {
                         <div class="mb-3">
-                            <i class="fas fa-undo fa-4x text-secondary"></i>
+                            <i class="fa fa-undo fa-4x text-secondary"></i>
                         </div>
                         <h5 class="text-secondary">已退款</h5>
                         <p class="text-muted mb-0">訂單已完成退款</p>
@@ -251,7 +251,7 @@
             <!-- 付款資訊 -->
             <div class="card">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i> 付款資訊</h5>
+                    <h5 class="mb-0"><i class="fa fa-credit-card me-2"></i> 付款資訊</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm table-borderless mb-0">
@@ -279,7 +279,7 @@
     <div class="row mt-4">
         <div class="col-12">
             <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-list"></i> 返回訂單列表
+                <i class="fa fa-list"></i> 返回訂單列表
             </a>
         </div>
     </div>
