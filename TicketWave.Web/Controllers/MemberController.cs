@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+//using AutoMapper.Execution;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -7,7 +8,7 @@ using TicketWave.Repository.Entity;
 using TicketWave.Service.Models.Info;
 using TicketWave.Service.Services.Interface;
 using TicketWave.Web.Models.Parameter;
-
+using TicketWave.Service.Models.Info;
 
 namespace TicketWave.Web.Controllers
 {
@@ -16,9 +17,9 @@ namespace TicketWave.Web.Controllers
         private readonly IMemberService _memberService;
         private readonly ILogger<MemberController> _logger;
         private readonly IMapper _mapper;
-        private readonly TicketWaveContext _dbContext;
+        private readonly MemberDbContext _dbContext;
         private readonly IOrderService _orderService;
-        public MemberController(IMemberService memberService, ILogger<MemberController> logger, IMapper mapper, TicketWaveContext dbContext, IOrderService orderService)
+        public MemberController(IMemberService memberService, ILogger<MemberController> logger, IMapper mapper, MemberDbContext dbContext, IOrderService orderService)
         {
             _memberService = memberService;
             _logger = logger;
@@ -468,7 +469,8 @@ namespace TicketWave.Web.Controllers
                 if (result)
                 {
                     TempData["SuccessMessage"] = "訂單已成功取消，座位已釋放";
-                    return Json(new { success = true, message = "訂單已取消" });
+                    //return Json(new { success = true, message = "訂單已取消" });
+                    return RedirectToAction("Orders");
                 }
                 else
                 {
@@ -538,6 +540,79 @@ namespace TicketWave.Web.Controllers
             {
                 _logger.LogError(ex, "重新選座失敗");
                 TempData["ErrorMessage"] = "重新選座時發生錯誤";
+                return RedirectToAction("Orders");
+            }
+        }
+
+        /// <summary>
+        /// 新增選座（保留原訂單，繼續選座）
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateSeats(Guid orderId)
+        {
+            try
+            {
+                // 檢查是否登入
+                var memberIdStr = HttpContext.Session.GetString("MemberId");
+                if (string.IsNullOrEmpty(memberIdStr))
+                {
+                    TempData["ErrorMessage"] = "請先登入";
+                    return RedirectToAction("Login");
+                }
+
+                var memberId = Guid.Parse(memberIdStr);
+
+                // 查詢訂單
+                var order = await _dbContext.Orders
+                    .Include(o => o.OrderDetails)
+                    .FirstOrDefaultAsync(o => o.OrderId == orderId && o.MemberId == memberId);
+
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "找不到訂單";
+                    return RedirectToAction("Orders");
+                }
+
+                // 檢查訂單狀態（只有待付款才能新增選座）
+                if (order.OrderStatus != 0)
+                {
+                    TempData["ErrorMessage"] = "此訂單狀態無法新增選座";
+                    return RedirectToAction("Orders");
+                }
+
+                // 檢查該會員在這場演唱會已購買的總票數
+                var currentTicketCount = await _orderService.GetMemberTicketCountForConcert(memberId, order.ConcertId);
+
+                // 檢查是否已達上限（4張）
+                if (currentTicketCount >= 4)
+                {
+                    TempData["ErrorMessage"] = "您已達到此場演唱會的購票上限（4張）";
+                    return RedirectToAction("Orders");
+                }
+
+                // 計算剩餘可購買數量
+                var remainingQuota = 4 - currentTicketCount;
+
+                // 查詢演唱會資訊
+                var concert = await _dbContext.Concerts.FindAsync(order.ConcertId);
+                if (concert == null)
+                {
+                    TempData["ErrorMessage"] = "找不到演唱會資訊";
+                    return RedirectToAction("Orders");
+                }
+
+                // 儲存訂單 ID 到 Session（用於後續新增座位）
+                HttpContext.Session.SetString("AddToOrderId", orderId.ToString());
+                HttpContext.Session.SetInt32("RemainingQuota", remainingQuota);
+
+                // 導向區域選擇頁面
+                return RedirectToAction("SelectZone", "Concert", new { concertId = order.ConcertId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "新增選座失敗");
+                TempData["ErrorMessage"] = "操作失敗，請稍後再試";
                 return RedirectToAction("Orders");
             }
         }
