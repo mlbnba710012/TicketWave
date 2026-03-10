@@ -117,18 +117,26 @@ namespace TicketWave.Web.Controllers
                 return View();
             }
             var result = await _memberService.Login(email, password);
-            if (!result)
+            if (!result.Success)
             {
-                ModelState.AddModelError("", "登入失敗，請檢查您的 Email 和密碼。");
+                //ModelState.AddModelError("", "登入失敗，請檢查您的 Email 和密碼。");
+                ModelState.AddModelError("", result.Message);
                 return View();
             }
 
-            var member = await _memberService.GetByEmail(email);
-            if (member != null)
+            //var member = await _memberService.GetByEmail(email);
+            //if (member != null)
+            //{
+            //    HttpContext.Session.SetString("MemberId", member.MemberId.ToString());
+            //    HttpContext.Session.SetString("MemberName", member.Name ?? "會員");
+            //    HttpContext.Session.SetString("MemberEmail", member.Email);
+            //}
+
+            if(result.Member != null)
             {
-                HttpContext.Session.SetString("MemberId", member.MemberId.ToString());
-                HttpContext.Session.SetString("MemberName", member.Name ?? "會員");
-                HttpContext.Session.SetString("MemberEmail", member.Email);
+                HttpContext.Session.SetString("MemberId", result.Member.MemberId.ToString());
+                HttpContext.Session.SetString("MemberName", result.Member.Name ?? "會員");
+                HttpContext.Session.SetString("MemberEmail", result.Member.Email);
             }
 
             // 登錄成功，重定向到首頁或其他頁面

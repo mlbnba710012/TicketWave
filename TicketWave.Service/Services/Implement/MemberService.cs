@@ -18,12 +18,60 @@ namespace TicketWave.Service.Services.Implement
             _memberRepository = memberRepository;
         }
 
+
+        //=============================
+        //基本CRUD
+        //=============================
+
+        //取得所有會員資料(只取未刪除會員)
         public async Task<List<Member>> GetAll()
         {
             var result = await _memberRepository.GetAll();
 
             return result;
         }
+
+        //取得所有會員資料(包含已刪除會員)，供後台使用
+        public async Task<List<Member>> GetAllIncludingDeleted()
+        {
+            var result = await _memberRepository.GetAllIncludingDeleted();
+            return result;
+        }
+
+
+        //根據會員ID取得會員單一資料(只取未刪除的)
+        public async Task<Member?> GetById(Guid memberId)
+        {
+            return await _memberRepository.GetById(memberId);
+        }
+
+        //根據會員ID取得會員單一資料(包含已刪除的)，供後台使用
+        public async Task<Member?> GetByIdIncludingDeleted(Guid memberId)
+        {
+            return await _memberRepository.GetByIdIncludingDeleted(memberId);
+        }
+
+        //根據Email取得會員單一資料(只取未刪除的)
+        public async Task<Member?> GetByEmail(string email)
+        {
+            return await _memberRepository.GetByEmail(email);
+        }
+
+        //根據Email取得會員單一資料(包含已刪除的)
+        public async Task<Member?> GetByEmailIncludingDeleted(string email)
+        {
+            return await _memberRepository.GetByEmailIncludingDeleted(email);
+        }
+
+        //取得所有已刪除的會員資料，供後台管理者使用
+        public async Task<List<Member>> GetDeletedMembers()
+        {
+            return await _memberRepository.GetDeletedMembers();
+        }
+
+        //=============================
+        //會員註冊/登入/登出相關
+        //=============================
 
         public async Task<(bool Success, string Message)> Register(RegisterInfo info)
         {
@@ -58,10 +106,27 @@ namespace TicketWave.Service.Services.Implement
             return (true,"註冊成功");
         }
 
-        public async Task<bool> Login(string email, string password)
+        public async Task<(bool Success, string Message, Member? Member)> Login(string email, string password)
         {
-            var member = await _memberRepository.GetByEmail(email);
-            return member != null && member.Password == password;
+            var member = await _memberRepository.GetByEmailIncludingDeleted(email);
+            if (member == null)
+            {
+                return(false, "無此帳號", null); // Invalid email
+            }
+
+            if (member.IsDelete)
+            {
+                return (false, "帳號已被刪除或停用", null); // Account has been deleted
+            }
+
+            if(member.Password != password || member.Email != email)
+            {
+                return (false, "Email或密碼錯誤", null); // Invalid password
+            }
+
+            return (true, "登入成功", member);
+
+            //return member != null && member.Password == password;
 
             //var member = await _memberRepository.GetByEmail(email);
             //if (member == null || member.Password != password)
@@ -78,16 +143,11 @@ namespace TicketWave.Service.Services.Implement
             return Task.CompletedTask;
         }
 
-        public async Task<Member?> GetById(Guid memberId)
-        {
-            return await _memberRepository.GetById(memberId);
-        }
+        //=============================
+        //會員資料管理相關
+        //=============================
 
-        public async Task<Member?> GetByEmail(string email)
-        {
-            return await _memberRepository.GetByEmail(email);
-        }
-
+        //更新會員資料(不包含密碼)
         public async Task<bool> UpdateMemberProfile(UpdateMemberProfileInfo info)
         {
             var member = await _memberRepository.GetById(info.MemberId);
@@ -136,8 +196,12 @@ namespace TicketWave.Service.Services.Implement
             return (true, "密碼修改成功");
         }
 
+        //=============================
+        //軟刪除帳號相關(刪除帳號但保留資料，供後台管理者查看)
+        //=============================
+
         /// <summary>
-        /// 刪除會員帳號
+        /// 會員自行刪除帳號
         /// </summary>
         public async Task<(bool Success, string Message)> DeleteAccount(Guid memberId, string password)
         {
@@ -157,12 +221,53 @@ namespace TicketWave.Service.Services.Implement
             // 3. 刪除會員
             //await _memberRepository.Delete(member);
             member.IsDelete = true; // 標記為刪除
+            member.UpdateDate = DateTime.Now;
             await _memberRepository.Update(member);
 
             return (true, "帳號已成功刪除");
         }
 
+        //管理者軟刪除會員帳號(會員資料可保留)
+        public async Task<(bool Success, string Message)> SoftDeleteMember(Guid memberId) 
+        {
+            var member = await _memberRepository.GetById(memberId);
+            if (member == null) return (false, "會員不存在"); // Member not found
+            member.IsDelete = true; // 標記為刪除
+            member.UpdateDate = DateTime.Now;
+            await _memberRepository.Update(member);
+            return (true, "會員已成功刪除");
+        }
 
+        //管理者恢復已刪除會員資料
+        public async Task<(bool Success, string Message)> RestoreMember(Guid memberId)
+        {
+            var member = await _memberRepository.GetByIdIncludingDeleted(memberId);
+            if (member == null) return (false, "會員不存在"); // Member not found
+            member.IsDelete = false; // 恢復會員
+            member.UpdateDate = DateTime.Now;
+            await _memberRepository.Update(member);
+            return (true, "會員帳號已成功恢復");
+        }
+
+        //=============================
+        //硬刪除會員資料(永久刪除，無法恢復)，供後台管理者使用，請謹慎使用!
+        //=============================
+
+        //管理者永久刪除會員(硬刪除)資料(無法恢復)
+        public async Task<(bool Success, string Message)> PermanentDeleteMember(Guid memberId)
+        {
+            var member = await _memberRepository.GetByIdIncludingDeleted(memberId);
+            if (member == null) return (false, "會員不存在"); // Member not found
+            if(member.Orders != null && member.Orders.Count > 0)
+            {
+                return (false, "此會員有訂單紀錄，無法永久刪除，建議使用軟刪除"); // Cannot delete member with related order data
+            }
+
+            await _memberRepository.Delete(member);
+            return (true, "會員資料已永久刪除");
+        }
+
+        //使用者自行永久刪除帳號(硬刪除)資料(無法恢復)
         public async Task<bool> DeleteMember(Guid memberId)
         {
             var member = await _memberRepository.GetById(memberId);
