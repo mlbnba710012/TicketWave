@@ -39,6 +39,15 @@ public partial class Order
     [Column(TypeName = "datetime")]
     public DateTime UpdateDate { get; set; }
 
+    [StringLength(20)]
+    public string PaymentMethod { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime? PaymentDate { get; set; }
+
+    [StringLength(100)]
+    public string PaymentTransactionId { get; set; }
+
     [ForeignKey("MemberId")]
     [InverseProperty("Orders")]
     public virtual Member Member { get; set; }

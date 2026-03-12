@@ -125,7 +125,7 @@
                     <a href="/Member/Orders" class="btn btn-outline-secondary" style="padding: 10px 30px;">
                         <i class="fa fa-arrow-left"></i> 返回訂單列表
                     </a>
-                    @if (Model.OrderStatus == 0)
+                    @* @if (Model.OrderStatus == 0)
                     {
                         <a href="#" class="btn btn-warning" style="padding: 10px 30px;">
                             <i class="fa fa-credit-card"></i> 前往付款
@@ -136,7 +136,32 @@
                         <button class="btn btn-success" style="padding: 10px 30px;" onclick="window.print()">
                             <i class="fa fa-print"></i> 列印訂單
                         </button>
+                    } *@
+
+                    @if (Model.OrderStatus == 0)
+                    {
+                        <!-- 修改：導向付款頁面 -->
+                        <a href="/Member/Payment?orderId=@Model.OrderId" class="btn btn-warning btn-lg" style="padding: 10px 30px;">
+                            <i class="fa fa-credit-card"></i> 前往付款
+                        </a>
                     }
+
+                    @if (Model.OrderStatus == 1)
+                    {
+                        <button class="btn btn-success" style="padding: 10px 30px;" onclick="window.print()">
+                            <i class="fa fa-print"></i> 列印訂單
+                        </button>
+
+                        <a href="/Member/Ticket?orderId=@Model.OrderId" class="btn btn-info" style="padding: 10px 30px;">
+                            <i class="fa fa-ticket-alt"></i> 查看電子票券
+                        </a>
+                    }
+
+                    @if (Model.OrderStatus == 2)
+                    {
+                        <span class="text-muted">此訂單已取消</span>
+                    }
+
                 </div>
             </div>
         </div>

@@ -1,0 +1,149 @@
+﻿@model List<TicketWave.Repository.Entity.Member>
+@{
+    ViewData["Title"] = "已刪除會員";
+    var totalDeleted = ViewBag.TotalDeleted ?? 0;
+}
+
+<div class="container-fluid mt-4">
+    <!-- 返回按鈕 -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> 返回會員列表
+            </a>
+        </div>
+    </div>
+
+    <!-- 標題 -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>
+                <i class="fas fa-trash-alt text-danger"></i> 已刪除會員
+                <span class="badge badge-danger ml-2">@totalDeleted 位</span>
+            </h2>
+            <hr />
+        </div>
+    </div>
+
+    <!-- 訊息顯示 -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+    }
+
+    <!-- 已刪除會員列表 -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> 已刪除會員列表
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>會員編號</th>
+                                    <th>姓名</th>
+                                    <th>Email</th>
+                                    <th>電話</th>
+                                    <th>註冊日期</th>
+                                    <th>刪除日期</th>
+                                    <th class="text-center">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Any())
+                                {
+                                    @foreach (var member in Model)
+                                    {
+                                        <tr class="table-danger">
+                                            <td>
+                                                <small class="text-monospace">
+                                                    @member.MemberId.ToString().Substring(0, 8)...
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <strong>@(member.Name ?? "未設定")</strong>
+                                                <i class="fas fa-trash text-danger ml-1"></i>
+                                            </td>
+                                            <td>@member.Email</td>
+                                            <td>@member.Phone</td>
+                                            <td>
+                                                <small>@member.CreateDate.ToString("yyyy/MM/dd")</small>
+                                            </td>
+                                            <td>
+                                                <small class="text-danger font-weight-bold">
+                                                    @member.UpdateDate.ToString("yyyy/MM/dd")
+                                                </small>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="@Url.Action("Details", new { id = member.MemberId })"
+                                                   class="btn btn-sm btn-info mr-1"
+                                                   title="查看詳情">
+                                                    <i class="fas fa-eye"></i> 詳情
+                                                </a>
+
+                                                <form asp-action="Restore" method="post" style="display: inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@member.MemberId" />
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-success"
+                                                            onclick="return confirm('確定要恢復此會員帳號嗎？')"
+                                                            title="恢復帳號">
+                                                        <i class="fas fa-undo"></i> 恢復
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5">
+                                            <i class="fas fa-smile fa-3x text-success mb-3"></i>
+                                            <p class="text-muted">太好了！目前沒有已刪除的會員</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-danger {
+        background-color: #f8d7da !important;
+    }
+
+    .card {
+        border-radius: 0.5rem;
+    }
+
+    .shadow {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    }
+
+    .text-monospace {
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+    }
+</style>

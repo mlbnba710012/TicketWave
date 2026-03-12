@@ -1,0 +1,238 @@
+﻿@model TicketWave.Repository.Entity.Order
+@{
+    ViewData["Title"] = "付款成功";
+    var orderDetails = ViewBag.OrderDetails as List<TicketWave.Repository.Entity.OrderDetail>;
+}
+
+<!-- Banner Section -->
+<section class="banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1 class="banner-header">付款成功</h1>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/Index">Home</a>
+                                <a href="/Member/Orders">Orders</a>
+                                <a href="#">Success</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Payment Success Section -->
+<section id="payment-success" style="padding: 60px 0; background-color: #f8f9fa;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <!-- 成功訊息 -->
+                <div class="text-center mb-5">
+                    <div class="success-icon mb-4" style="font-size: 80px; color: #28a745;">
+                        <i class="fa fa-check-circle"></i>
+                    </div>
+                    <h2 class="text-success mb-3">付款成功！</h2>
+                    <p class="lead text-muted">
+                        感謝您的購買，您的訂單已完成付款
+                    </p>
+                </div>
+
+                <!-- 訂單資訊卡片 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fa fa-receipt"></i> 訂單資訊
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>訂單編號：</strong><br />
+                                    <span class="text-primary">@Model.OrderNumber</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>演唱會：</strong><br />
+                                    @Model.ConcertName
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>付款時間：</strong><br />
+                                    @Model.PaymentDate?.ToString("yyyy/MM/dd HH:mm")
+                                </p>
+                                <p class="mb-2">
+                                    <strong>付款金額：</strong><br />
+                                    <span class="text-success h4">NT$ @Model.TotalAmount.ToString("N0")</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 座位資訊 -->
+                        <hr />
+                        <h6 class="mb-3">
+                            <i class="fa fa-ticket"></i> 座位資訊
+                        </h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>區域</th>
+                                        <th>排</th>
+                                        <th>號</th>
+                                        <th>票價</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (orderDetails != null && orderDetails.Any())
+                                    {
+                                        foreach (var detail in orderDetails)
+                                        {
+                                            <tr>
+                                                <td><strong>@detail.SeatZone</strong></td>
+                                                <td>@detail.SeatRow 排</td>
+                                                <td>@detail.SeatNumber 號</td>
+                                                <td>NT$ @detail.Price.ToString("N0")</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                                <tfoot class="thead-light">
+                                    <tr>
+                                        <td colspan="3" class="text-right"><strong>總計</strong></td>
+                                        <td><strong>NT$ @Model.TotalAmount.ToString("N0")</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 重要提醒 -->
+                <div class="alert alert-info">
+                    <h6><i class="fa fa-info-circle"></i> 重要提醒</h6>
+                    <ul class="mb-0">
+                        <li>訂單確認信已寄送至您的註冊信箱，請查收</li>
+                        <li>演唱會當天請攜帶身分證件及訂單編號入場</li>
+                        <li>如需退票，請於演唱會前7天提出申請</li>
+                        <li>票券不得轉售或轉讓，違者將取消入場資格</li>
+                    </ul>
+                </div>
+
+                <!-- 操作按鈕 -->
+                <div class="text-center mt-4">
+                    <a href="/Member/Orders" class="btn btn-primary btn-lg mr-2">
+                        <i class="fa fa-list"></i> 查看所有訂單
+                    </a>
+                    <a href="/Member/OrderDetail?orderId=@Model.OrderId" class="btn btn-outline-secondary btn-lg mr-2">
+                        <i class="fa fa-file-alt"></i> 訂單詳情
+                    </a>
+                    <button class="btn btn-success btn-lg" onclick="window.print()">
+                        <i class="fa fa-print"></i> 列印訂單
+                    </button>
+                </div>
+
+                <!-- 分享按鈕 -->
+                <div class="text-center mt-4">
+                    <p class="text-muted">分享給朋友：</p>
+                    <div class="share-buttons">
+                        <a href="#" class="btn btn-outline-primary btn-sm mr-2">
+                            <i class="fa fa-facebook-f"></i> Facebook
+                        </a>
+                        <a href="#" class="btn btn-outline-info btn-sm mr-2">
+                            <i class="fa fa-twitter"></i> Twitter
+                        </a>
+                        <a href="#" class="btn btn-outline-success btn-sm">
+                            <i class="fa fa-line"></i> LINE
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 繼續購票 -->
+                <div class="text-center mt-5">
+                    <hr />
+                    <p class="text-muted">想要購買更多演唱會門票？</p>
+                    <a href="/Concert/Index" class="btn btn-outline-primary">
+                        <i class="fa fa-music"></i> 瀏覽更多演唱會
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Confetti Animation (optional) -->
+@section Scripts {
+    <script>
+        // 頁面載入時播放成功音效（可選）
+        $(document).ready(function () {
+            // 可以加入慶祝動畫或音效
+            console.log('Payment successful!');
+        });
+
+        // 防止返回鍵
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function () {
+            window.history.pushState(null, null, window.location.href);
+        };
+    </script>
+}
+
+<style>
+    .success-icon {
+        animation: scaleIn 0.5s ease-in-out;
+    }
+
+    @@keyframes scaleIn {
+        0% {
+            transform: scale(0);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .card {
+        border-radius: 10px;
+        animation: fadeInUp 0.6s ease-in-out;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .btn-lg {
+        font-size: 1.1rem;
+        padding: 12px 30px;
+    }
+
+    .share-buttons a {
+        min-width: 100px;
+    }
+
+    @@media print {
+        .btn, .share-buttons, .alert {
+            display: none !important;
+        }
+    }
+</style>

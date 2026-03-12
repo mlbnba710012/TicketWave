@@ -1,0 +1,405 @@
+﻿@model TicketWave.Repository.Entity.Order
+@{
+    ViewData["Title"] = "訂單付款";
+    var orderDetails = ViewBag.OrderDetails as List<TicketWave.Repository.Entity.OrderDetail>;
+}
+
+<!-- Banner Section -->
+<section class="banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1 class="banner-header">訂單付款</h1>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/Index">Home</a>
+                                <a href="/Member/Orders">Orders</a>
+                                <a href="#">Payment</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Payment Section -->
+<section id="payment-section" style="padding: 60px 0; background-color: #f8f9fa;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <!-- 訂單摘要 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fa fa-shopping-cart"></i> 訂單摘要
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="mb-3">
+                                    <i class="fa fa-music"></i> @Model.ConcertName
+                                </h5>
+                                <p class="text-muted mb-2">
+                                    訂單編號：<strong>@Model.OrderNumber</strong>
+                                </p>
+                                <p class="text-muted mb-2">
+                                    訂購時間：@Model.CreateDate.ToString("yyyy/MM/dd HH:mm")
+                                </p>
+                                <p class="text-muted">
+                                    票數：<strong>@Model.TicketCount 張</strong>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <p class="text-muted mb-2">應付金額</p>
+                                <h2 class="text-danger mb-0">
+                                    NT$ @Model.TotalAmount.ToString("N0")
+                                </h2>
+                            </div>
+                        </div>
+
+                        <!-- 座位明細摺疊區 -->
+                        <hr />
+                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#seatDetails">
+                            <i class="fa fa-ticket"></i> 查看座位明細
+                        </button>
+                        <div class="collapse" id="seatDetails">
+                            <div class="table-responsive mt-3">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>區域</th>
+                                            <th>排</th>
+                                            <th>號</th>
+                                            <th>票價</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (orderDetails != null && orderDetails.Any())
+                                        {
+                                            foreach (var detail in orderDetails)
+                                            {
+                                                <tr>
+                                                    <td>@detail.SeatZone</td>
+                                                    <td>@detail.SeatRow 排</td>
+                                                    <td>@detail.SeatNumber 號</td>
+                                                    <td>NT$ @detail.Price.ToString("N0")</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 付款方式選擇 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">
+                            <i class="fa fa-credit-card"></i> 選擇付款方式
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="paymentForm">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="orderId" value="@Model.OrderId" />
+
+                            <!-- 付款方式選項 -->
+                            <div class="payment-methods">
+                                <!-- 信用卡 -->
+                                <div class="payment-option">
+                                    <div class="custom-control custom-radio mb-3">
+                                        <input type="radio" id="creditCard" name="paymentMethod" value="credit_card"
+                                               class="custom-control-input" checked>
+                                        <label class="custom-control-label" for="creditCard">
+                                            <i class="fa fa-credit-card fa-2x text-primary"></i>
+                                            <strong class="ml-2">信用卡</strong>
+                                        </label>
+                                    </div>
+
+                                    <!-- 信用卡表單 -->
+                                    <div id="creditCardForm" class="payment-form ml-4">
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <label for="cardNumber">卡號 <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="cardNumber" name="cardNumber"
+                                                       placeholder="1234 5678 9012 3456" maxlength="16" required>
+                                                <small class="text-muted">請輸入16位數字（測試用：4111111111111111）</small>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="cardExpiry">有效期限 <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="cardExpiry" name="cardExpiry"
+                                                       placeholder="MM/YY" maxlength="5" required>
+                                                <small class="text-muted">格式：MM/YY（測試用：12/25）</small>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="cardCvv">安全碼 <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="cardCvv" name="cardCvv"
+                                                       placeholder="123" maxlength="3" required>
+                                                <small class="text-muted">卡片背面3碼（測試用：123）</small>
+                                            </div>
+                                            <div class="col-md-12 mb-3">
+                                                <label for="cardHolder">持卡人姓名 <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="cardHolder" name="cardHolder"
+                                                       placeholder="WANG XIAO MING" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+
+                                <!-- ATM 轉帳 -->
+                                <div class="payment-option">
+                                    <div class="custom-control custom-radio mb-3">
+                                        <input type="radio" id="atm" name="paymentMethod" value="atm"
+                                               class="custom-control-input">
+                                        <label class="custom-control-label" for="atm">
+                                            <i class="fa fa-university fa-2x text-success"></i>
+                                            <strong class="ml-2">ATM 轉帳</strong>
+                                        </label>
+                                    </div>
+
+                                    <div id="atmForm" class="payment-form ml-4" style="display: none;">
+                                        <div class="alert alert-info">
+                                            <h6><i class="fa fa-info-circle"></i> 轉帳資訊</h6>
+                                            <p class="mb-1">銀行代碼：<strong>012</strong></p>
+                                            <p class="mb-1">銀行名稱：<strong>台北富邦銀行</strong></p>
+                                            <p class="mb-1">帳號：<strong>1234567890</strong></p>
+                                            <p class="mb-1">戶名：<strong>TicketWave 票務系統</strong></p>
+                                            <p class="mb-0 text-danger">
+                                                <small>* 請於付款後3天內完成轉帳，逾期訂單將自動取消</small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+
+                                <!-- 超商代碼繳費 -->
+                                <div class="payment-option">
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="cvs" name="paymentMethod" value="cvs"
+                                               class="custom-control-input">
+                                        <label class="custom-control-label" for="cvs">
+                                            <i class="fa fa-store fa-2x text-warning"></i>
+                                            <strong class="ml-2">超商代碼繳費</strong>
+                                        </label>
+                                    </div>
+
+                                    <div id="cvsForm" class="payment-form ml-4" style="display: none;">
+                                        <div class="alert alert-info">
+                                            <p class="mb-2">
+                                                <i class="fa fa-info-circle"></i>
+                                                選擇此付款方式後，系統將產生繳費代碼
+                                            </p>
+                                            <p class="mb-0">
+                                                <small>* 適用超商：7-ELEVEN、全家、萊爾富、OK超商</small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 同意條款 -->
+                            <div class="custom-control custom-checkbox mt-4 mb-3">
+                                <input type="checkbox" class="custom-control-input" id="agreeTerms" required>
+                                <label class="custom-control-label" for="agreeTerms">
+                                    我已閱讀並同意 <a href="#" data-toggle="modal" data-target="#termsModal">服務條款</a> 及 <a href="#">退換票政策</a>
+                                </label>
+                            </div>
+
+                            <!-- 按鈕區 -->
+                            <div class="text-center mt-4">
+                                <button type="button" class="btn btn-secondary btn-lg mr-2" onclick="window.location.href='/Member/Orders'">
+                                    <i class="fa fa-arrow-left"></i> 返回訂單列表
+                                </button>
+                                <button type="submit" class="btn btn-success btn-lg" id="submitPayment">
+                                    <i class="fa fa-lock"></i> 確認付款 NT$ @Model.TotalAmount.ToString("N0")
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 安全提示 -->
+                <div class="alert alert-warning text-center">
+                    <i class="fa fa-shield-alt"></i>
+                    <strong>安全交易保障</strong> - 您的付款資訊經過加密保護，請放心使用
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 服務條款 Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">服務條款</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h6>1. 購票須知</h6>
+                <p>購票前請詳閱演唱會相關規定...</p>
+
+                <h6>2. 退換票政策</h6>
+                <p>演唱會前7天可申請退票...</p>
+
+                <h6>3. 注意事項</h6>
+                <p>請妥善保管票券...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+                <h5>處理付款中...</h5>
+                <p class="text-muted">請稍候，請勿關閉或重新整理頁面</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* @section Scripts { *@
+@section MyJS {
+    <script>
+        $(document).ready(function () {
+            // 付款方式切換
+            $('input[name="paymentMethod"]').change(function () {
+                $('.payment-form').hide();
+
+                var method = $(this).val();
+                if (method === 'credit_card') {
+                    $('#creditCardForm').show();
+                } else if (method === 'atm') {
+                    $('#atmForm').show();
+                } else if (method === 'cvs') {
+                    $('#cvsForm').show();
+                }
+            });
+
+            // 卡號格式化（每4位加空格）
+            $('#cardNumber').on('input', function () {
+                var value = $(this).val().replace(/\s/g, '');
+                value = value.replace(/\D/g, ''); // 只保留數字
+                $(this).val(value);
+            });
+
+            // 有效期限格式化（MM/YY）
+            $('#cardExpiry').on('input', function () {
+                var value = $(this).val().replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                $(this).val(value);
+            });
+
+            // CVV 只允許數字
+            $('#cardCvv').on('input', function () {
+                $(this).val($(this).val().replace(/\D/g, ''));
+            });
+
+            // 表單提交
+            // $('#paymentForm').submit(function (e) {
+            //     e.preventDefault();
+
+            $('#paymentForm').submit(function (e) {
+                e.preventDefault();
+                console.log('submit 觸發');
+                console.log('formData:', $(this).serialize());
+
+                // 檢查是否同意條款
+                if (!$('#agreeTerms').is(':checked')) {
+                    alert('請閱讀並同意服務條款');
+                    return false;
+                }
+
+                var formData = $(this).serialize();
+
+                // 顯示 Loading
+                $('#loadingModal').modal('show');
+                $('#submitPayment').prop('disabled', true);
+
+                // 送出付款請求
+                $.ajax({
+                    url: '/Member/ProcessPayment',
+                    type: 'POST',
+                    data: formData,
+                    success: function (response) {
+                        $('#loadingModal').modal('hide');
+
+                        if (response.success) {
+                            // 付款成功，導向成功頁面
+                            window.location.href = '/Member/PaymentSuccess?orderId=' + response.orderId;
+                        } else {
+                            alert('付款失敗：' + response.message);
+                            $('#submitPayment').prop('disabled', false);
+                        }
+                    },
+                    error: function () {
+                        $('#loadingModal').modal('hide');
+                        alert('付款處理失敗，請稍後再試');
+                        $('#submitPayment').prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<style>
+    .payment-option {
+        padding: 20px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        transition: all 0.3s;
+    }
+
+        .payment-option:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+    .payment-form {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        margin-top: 15px;
+    }
+
+    .custom-control-label {
+        font-size: 1.1rem;
+        cursor: pointer;
+    }
+
+    .btn-lg {
+        font-size: 1.1rem;
+        padding: 12px 30px;
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+</style>

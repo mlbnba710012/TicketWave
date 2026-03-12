@@ -1,14 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
-using AutoMapper;
+﻿using AutoMapper;
+//using AutoMapper.Execution;
 //using AutoMapper.Execution;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using TicketWave.Repository.Entity;
 using TicketWave.Service.Models.Info;
 using TicketWave.Service.Services.Interface;
 using TicketWave.Web.Models.Parameter;
-using TicketWave.Service.Models.Info;
+
 
 namespace TicketWave.Web.Controllers
 {
@@ -29,6 +30,17 @@ namespace TicketWave.Web.Controllers
 
         }
 
+        //取得當前登入的會員ID
+        private Guid? GetCurrentMemberId()
+        {
+            var memberIdStr = HttpContext.Session.GetString("MemberId");
+            if (string.IsNullOrEmpty(memberIdStr))
+            {
+                return null;
+            }
+            return Guid.Parse(memberIdStr);
+        }
+
         public async Task<IActionResult> Index()
         {
             var result = await _memberService.GetAll();
@@ -41,7 +53,7 @@ namespace TicketWave.Web.Controllers
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken] // 加入安全性標籤
+        [ValidateAntiForgeryToken] // 加入安全性標籤
         public async Task<IActionResult> Register(RegisterParameter parameter)
         {
             //if (!ModelState.IsValid)
@@ -93,8 +105,8 @@ namespace TicketWave.Web.Controllers
             if (result.Success)
             {
                 TempData["SuccessMessage"] = "註冊成功！請登入";
-                //return RedirectToAction("Login");
-                return View();
+                return RedirectToAction("Login");
+                //return View();
             }
 
             // 註冊失敗
@@ -218,11 +230,17 @@ namespace TicketWave.Web.Controllers
                 // 保存變更
                 var result = await _memberService.UpdateMemberProfile(new UpdateMemberProfileInfo
                 {
-                    MemberId = existingMember.MemberId,
-                    Name = existingMember.Name,
-                    Phone = existingMember.Phone,
-                    BirthDate = existingMember.BirthDate,
-                    Address = existingMember.Address
+                    //MemberId = existingMember.MemberId,
+                    //Name = existingMember.Name,
+                    //Phone = existingMember.Phone,
+                    //BirthDate = existingMember.BirthDate,
+                    //Address = existingMember.Address
+
+                    MemberId = memberId,
+                    Name = member.Name,
+                    Phone = member.Phone,
+                    BirthDate = member.BirthDate,
+                    Address = member.Address,
                 });
 
                 if (result)
@@ -234,7 +252,8 @@ namespace TicketWave.Web.Controllers
                     TempData["SuccessMessage"] = "個人資料更新成功！";
 
                     // 更新 Session 中的姓名
-                    HttpContext.Session.SetString("MemberName", existingMember.Name ?? "會員");
+                    //HttpContext.Session.SetString("MemberName", existingMember.Name ?? "會員");
+                    HttpContext.Session.SetString("MemberName", member.Name ?? "會員");
                 }
                 else
                 {
@@ -346,7 +365,7 @@ namespace TicketWave.Web.Controllers
                 if (string.IsNullOrEmpty(password))
                 {
                     TempData["ErrorMessage"] = "請輸入密碼以確認刪除";
-                    return RedirectToAction("ChangePassword");
+                    return RedirectToAction("Profile");
                 }
 
                 // 呼叫 Service 刪除帳號
@@ -363,14 +382,14 @@ namespace TicketWave.Web.Controllers
                 else
                 {
                     TempData["ErrorMessage"] = result.Message;
-                    return RedirectToAction("ChangePassword");
+                    return RedirectToAction("Profile");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "刪除帳號失敗");
                 TempData["ErrorMessage"] = "刪除帳號時發生錯誤";
-                return RedirectToAction("ChangePassword");
+                return RedirectToAction("Profile");
             }
         }
 
@@ -627,29 +646,228 @@ namespace TicketWave.Web.Controllers
         }
 
 
+        //付款頁面
+        [HttpGet]
+        public async Task<IActionResult> Payment(Guid orderId) 
+        {
+            try
+            {
+                var memberIdStr = HttpContext.Session.GetString("MemberId");
+                if (string.IsNullOrEmpty(memberIdStr))
+                {
+                    TempData["ErrorMessage"] = "請先登入";
+                    return RedirectToAction("Login");
+                }
+
+                var memberId = Guid.Parse(memberIdStr);
+                //var order = await _dbContext.Orders.Include(o => o.ConcertId).FirstOrDefaultAsync(o => o.OrderId == orderid && o.MemberId == memberId.Value);
+                // 先查詢訂單資訊
+                var order = await _dbContext.Orders
+                    .FirstOrDefaultAsync(o => o.OrderId == orderId && o.MemberId == memberId);
+
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "找不到此訂單";
+                    return RedirectToAction("Orders");
+                }
+
+                //檢查訂單狀態
+                if (order.OrderStatus != 0)
+                {
+                    TempData["ErrorMessage"] = "此訂單狀態無法付款";
+                    return RedirectToAction("OrderDetail", new { orderId });
+                }
+
+                //查詢訂單明細
+                var orderDetails = await _dbContext.OrderDetails
+                    .Where(od => od.OrderId == orderId)
+                    .OrderBy(od => od.SeatZone)
+                    .ThenBy(od => od.SeatRow)
+                    .ThenBy(od => od.SeatNumber)
+                    .ToListAsync();
+
+                ViewBag.OrderDetails = orderDetails;
+
+                return View(order);
+
+            }
+
+            catch (Exception ex) 
+            {
+                _logger.LogError(ex, "載入付款頁面失敗");
+                TempData["ErrorMessage"] = "載入付款頁面失敗";
+                return RedirectToAction("Orders");
+            }
+        }
+
+        //模擬付款處理
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProcessPayment(Guid orderId, string paymentMethod, string cardNumber = null, string cardExpiry = null, string cardCvv = null)
+        {
+            try
+            {
+                var memberIdStr = HttpContext.Session.GetString("MemberId");
+                if (string.IsNullOrEmpty(memberIdStr))
+                {
+                    TempData["ErrorMessage"] = "請先登入";
+                    return RedirectToAction("Login");
+                }
+                var memberId = Guid.Parse(memberIdStr);
+
+
+                //查詢訂單
+                var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId && o.MemberId == memberId);
+
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "找不到此訂單";
+                    return RedirectToAction("Orders");
+                }
+
+                //檢查訂單狀態
+                if (order.OrderStatus != 0)
+                {
+                    TempData["ErrorMessage"] = "此訂單狀態無法付款";
+                    return RedirectToAction("OrderDetail", new { orderId });
+                }
+
+                //驗證付款資訊
+                if (string.IsNullOrEmpty(paymentMethod))
+                {
+                    TempData["ErrorMessage"] = "請選擇付款方式";
+                    return RedirectToAction("Payment", new { orderId });
+                }
+
+                if (paymentMethod == "credit_card")
+                {
+                    //驗證信用卡資訊(模擬)
+                    if (string.IsNullOrEmpty(cardNumber) || cardNumber.Length != 16)
+                    {
+                        //TempData["ErrorMessage"] = "請輸入正確的信用卡號碼(16碼)";
+                        return Json(new { success = false, message = "請輸入正確的信用卡號碼(16碼)" });
+                        //return RedirectToAction("Payment", new { orderId });
+                    }
+
+                    if (string.IsNullOrEmpty(cardExpiry) || !DateTime.TryParseExact(cardExpiry, "MM/yy", null, System.Globalization.DateTimeStyles.None, out DateTime expiryDate) || expiryDate < DateTime.Now)
+                    {
+                        //TempData["ErrorMessage"] = "請輸入有效的信用卡到期日(MM/YY)";
+                        //return RedirectToAction("Payment", new { orderId });
+                        return Json(new { success = false, message = "請輸入有效的信用卡到期日(MM/YY)" });
+                    }
+
+                    if (string.IsNullOrEmpty(cardCvv) || cardCvv.Length != 3)
+                    {
+                        //TempData["ErrorMessage"] = "請輸入正確的CVV碼(安全碼共3碼)";
+                        //return RedirectToAction("Payment", new { orderId });
+                        return Json(new { success = false, message = "請輸入正確的CVV碼(安全碼共3碼)" });
+                    }
+                }
+
+                //模擬付款處理
+                await Task.Delay(2000); // 模擬處理時間
+
+                //更新訂單狀態為已付款(1)
+                order.OrderStatus = 1;
+                order.PaymentMethod = paymentMethod;
+                order.PaymentDate = DateTime.Now;
+                order.UpdateDate = DateTime.Now;
+
+                await _dbContext.SaveChangesAsync();
+
+                _logger.LogInformation($"訂單 {orderId} 已成功付款，付款方式：{paymentMethod}");
+                //logger.LogInformation($"訂單付款成功：OrderId={orderId}, Amount={order.TotalAmount}");
+                return Json(new { success = true, message = "付款成功！", orderId = orderId.ToString() });
+                //return RedirectToAction("OrderDetail", new { orderId });
+
+
+                //return Json(new
+                //{
+                //    success = true,
+                //    message = "付款成功！",
+                //    orderId = orderId.ToString()
+                //});
+
+            }
+
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "付款處理失敗");
+                return Json(new { success = false, message = "付款處理失敗，請稍後再試" });
+
+                //TempData["ErrorMessage"] = "付款處理失敗，請稍後再試";
+                //return RedirectToAction("Payment", new { orderId });
+                //return Json(new
+                //{
+                //    success = false,
+                //    message = "付款處理失敗，請稍後再試"
+                //});
+            }
+        }
+
+        //付款成功頁面
+        [HttpGet]
+        public async Task<IActionResult> PaymentSuccess(Guid orderId)
+        {
+            try
+            {
+                var memberIdStr = HttpContext.Session.GetString("MemberId");
+                if (string.IsNullOrEmpty(memberIdStr))
+                {
+                    TempData["ErrorMessage"] = "請先登入";
+                    return RedirectToAction("Login");
+                }
+                var memberId = Guid.Parse(memberIdStr);
+                //查詢訂單
+                var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId && o.MemberId == memberId);
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "找不到此訂單";
+                    return RedirectToAction("Orders");
+                }
+                //檢查訂單狀態
+                if (order.OrderStatus != 1)
+                {
+                    TempData["ErrorMessage"] = "此訂單尚未付款成功";
+                    return RedirectToAction("OrderDetail", new { orderId });
+                }
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "載入付款成功頁面失敗");
+                TempData["ErrorMessage"] = "載入頁面失敗，請稍後再試";
+                return RedirectToAction("Orders");
+            }
+        }
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
+        //public async Task<IActionResult> Logout()
+        public IActionResult Logout()
         {
             HttpContext.Session.Clear();
+            //ViewData["SuccessMessage"] = "您已成功登出";
             return RedirectToAction("Index", "Home");
         }
 
 
-        public async Task<IActionResult> UpdateMemberProfile(UpdateMemberProfileParameter parameter)
-        {
-            var info = _mapper.Map<UpdateMemberProfileInfo>(parameter);
-            var member = await _memberService.UpdateMemberProfile(info);
+        //public async Task<IActionResult> UpdateMemberProfile(UpdateMemberProfileParameter parameter)
+        //{
+        //    var info = _mapper.Map<UpdateMemberProfileInfo>(parameter);
+        //    var member = await _memberService.UpdateMemberProfile(info);
 
-            return View();
-        }
+        //    return View();
+        //}
 
-        public async Task<IActionResult> DeleteMember(Guid memberId)
-        {
-            var member = await _memberService.GetById(memberId);
-            if (member == null) return NotFound();
-            return View(member);
-        }
+        //public async Task<IActionResult> DeleteMember(Guid memberId)
+        //{
+        //    var member = await _memberService.GetById(memberId);
+        //    if (member == null) return NotFound();
+        //    return View(member);
+        //}
     }
 }
