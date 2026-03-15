@@ -1,0 +1,147 @@
+@model TicketWave.Repository.Entity.ContactMessage
+
+@{
+    ViewData["Title"] = "留言詳情";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fa fa-envelope-open me-2"></i> 留言詳情</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i> 返回列表
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success"><i class="fa fa-check-circle me-2"></i>@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger"><i class="fa fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- 留言內容 -->
+            <div class="card mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fa fa-comment me-2"></i> 留言內容</h5>
+                    @if (Model.Status == 0)
+                    {
+                        <span class="badge bg-danger">未處理</span>
+                    }
+                    else if (Model.Status == 1)
+                    {
+                        <span class="badge bg-warning text-dark">處理中</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">已回覆</span>
+                    }
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th style="width:120px;">姓名</th>
+                            <td><strong>@Model.Name</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>
+                                <a href="mailto:@Model.Email">@Model.Email</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>問題類別</th>
+                            <td><span class="badge bg-secondary">@Model.Category</span></td>
+                        </tr>
+                        <tr>
+                            <th>主旨</th>
+                            <td><strong>@Model.Subject</strong></td>
+                        </tr>
+                        <tr>
+                            <th>留言時間</th>
+                            <td>@Model.CreateDate.ToString("yyyy/MM/dd HH:mm")</td>
+                        </tr>
+                    </table>
+                    <hr />
+                    <h6 class="text-muted mb-3">留言內容：</h6>
+                    <div style="background:#f8f9fa;padding:20px;border-radius:8px;white-space:pre-wrap;">@Model.Message</div>
+                </div>
+            </div>
+
+            <!-- 管理員回覆 -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fa fa-reply me-2"></i> 回覆留言</h5>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.AdminReply))
+                    {
+                        <div class="alert alert-info mb-3">
+                            <h6 class="fw-bold">目前回覆內容：</h6>
+                            <p class="mb-0" style="white-space:pre-wrap;">@Model.AdminReply</p>
+                        </div>
+                    }
+
+                    <form asp-action="Reply" asp-route-id="@Model.MessageId" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">回覆內容</label>
+                            <textarea name="adminReply" class="form-control" rows="5"
+                                      placeholder="請輸入回覆內容...">@Model.AdminReply</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-paper-plane me-2"></i> 送出回覆
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側：操作 -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fa fa-cog me-2"></i> 更新狀態</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="UpdateStatus" asp-route-id="@Model.MessageId" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <select name="status" class="form-select">
+                                <option value="0" selected="@(Model.Status == 0)">未處理</option>
+                                <option value="1" selected="@(Model.Status == 1)">處理中</option>
+                                <option value="2" selected="@(Model.Status == 2)">已回覆</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">
+                            <i class="fa fa-refresh me-2"></i> 更新狀態
+                        </button>
+                    </form>
+
+                    <hr />
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted">留言 ID</td>
+                            <td><small class="font-monospace">@Model.MessageId.ToString().Substring(0, 8)...</small></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">留言時間</td>
+                            <td><small>@Model.CreateDate.ToString("yyyy/MM/dd HH:mm")</small></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">最後更新</td>
+                            <td><small>@Model.UpdateDate.ToString("yyyy/MM/dd HH:mm")</small></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

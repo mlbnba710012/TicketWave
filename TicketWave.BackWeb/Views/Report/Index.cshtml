@@ -1,0 +1,258 @@
+@model TicketWave.BackWeb.Controllers.SalesReport
+
+@{
+    ViewData["Title"] = "銷售報表";
+    string eventType = ViewBag.EventType as string ?? "concert";
+    Guid? eventId = ViewBag.EventId as Guid?;
+
+    var concerts = ViewBag.Concerts as List<TicketWave.Repository.Entity.Concert>;
+    var sports   = ViewBag.Sports   as List<TicketWave.Repository.Entity.Sport>;
+    var theaters = ViewBag.Theaters as List<TicketWave.Repository.Entity.Theater>;
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2><i class="fa fa-bar-chart me-2"></i> 銷售報表</h2>
+        </div>
+        @if (Model != null)
+        {
+            <div class="col-md-6 text-end">
+                <a asp-action="DownloadCsv"
+                   asp-route-eventType="@eventType"
+                   asp-route-eventId="@eventId"
+                   class="btn btn-outline-success me-2">
+                    <i class="fa fa-file-text-o me-1"></i> 下載 CSV
+                </a>
+                <a asp-action="DownloadExcel"
+                   asp-route-eventType="@eventType"
+                   asp-route-eventId="@eventId"
+                   class="btn btn-success">
+                    <i class="fa fa-file-excel-o me-1"></i> 下載 Excel
+                </a>
+            </div>
+        }
+    </div>
+
+    <!-- 篩選表單 -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fa fa-filter me-2"></i> 選擇活動</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">活動類型</label>
+                    <select name="eventType" id="eventTypeSelect" class="form-select"
+                            onchange="this.form.submit()">
+                        <option value="concert" selected="@(eventType == "concert")">🎵 演唱會</option>
+                        <option value="sport" selected="@(eventType == "sport")">🏆 體育賽事</option>
+                        <option value="theater" selected="@(eventType == "theater")">🎭 表演藝術</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">選擇活動場次</label>
+                    <select name="eventId" class="form-select">
+                        <option value="">請選擇場次...</option>
+                        @if (eventType == "concert" && concerts != null)
+                        {
+                            @foreach (var c in concerts)
+                            {
+                                <option value="@c.ConcertId"
+                                        selected="@(eventId == c.ConcertId)">
+                                    @c.ConcertName (@c.PerformanceDate.ToString("yyyy/MM/dd"))
+                                </option>
+                            }
+                        }
+                        else if (eventType == "sport" && sports != null)
+                        {
+                            @foreach (var s in sports)
+                            {
+                                <option value="@s.SportId"
+                                        selected="@(eventId == s.SportId)">
+                                    @s.SportName (@s.PerformanceDate.ToString("yyyy/MM/dd"))
+                                </option>
+                            }
+                        }
+                        else if (eventType == "theater" && theaters != null)
+                        {
+                            @foreach (var t in theaters)
+                            {
+                                <option value="@t.TheaterId"
+                                        selected="@(eventId == t.TheaterId)">
+                                    @t.TheaterName (@t.PerformanceDate.ToString("yyyy/MM/dd"))
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa fa-search me-1"></i> 查看報表
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model != null)
+    {
+        <!-- 活動摘要 -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-2">
+                <div class="card text-white" style="background:linear-gradient(135deg,#1a73e8,#0d47a1);">
+                    <div class="card-body text-center">
+                        <h6 class="opacity-75">總座位數</h6>
+                        <h2 class="mb-0">@Model.TotalSeats</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-white bg-danger">
+                    <div class="card-body text-center">
+                        <h6 class="opacity-75">已售出</h6>
+                        <h2 class="mb-0">@Model.TotalSold</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-white bg-success">
+                    <div class="card-body text-center">
+                        <h6 class="opacity-75">剩餘座位</h6>
+                        <h2 class="mb-0">@Model.TotalAvailable</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-white bg-warning">
+                    <div class="card-body text-center">
+                        <h6 class="opacity-75">售出率</h6>
+                        <h2 class="mb-0">@Model.TotalSoldPercentage.ToString("F1")%</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-white" style="background:linear-gradient(135deg,#764ba2,#667eea);">
+                    <div class="card-body text-center">
+                        <h6 class="opacity-75">總訂單數</h6>
+                        <h2 class="mb-0">@Model.TotalOrders</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-white bg-dark">
+                    <div class="card-body text-center">
+                        <h6 class="opacity-75">總銷售金額</h6>
+                        <h4 class="mb-0">$@Model.TotalRevenue.ToString("N0")</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 整體售出進度條 -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <strong>整體售出進度</strong>
+                    <strong>@Model.TotalSoldPercentage.ToString("F1")%</strong>
+                </div>
+                <div class="progress" style="height:25px;">
+                    <div class="progress-bar bg-success"
+                         style="width:@Model.TotalSoldPercentage.ToString("F1")%;">
+                        @Model.TotalSold / @Model.TotalSeats 席
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 各區域明細 -->
+        <div class="card mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fa fa-table me-2"></i> 各區域銷售明細</h5>
+                <small class="text-muted">報表產出時間：@Model.ReportGeneratedAt.ToString("yyyy/MM/dd HH:mm")</small>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>區域</th>
+                                <th class="text-center">票價 (NT$)</th>
+                                <th class="text-center">總座位數</th>
+                                <th class="text-center">已售出</th>
+                                <th class="text-center">剩餘</th>
+                                <th style="min-width:180px;">售出率</th>
+                                <th class="text-end">銷售金額 (NT$)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.ZoneRows)
+                            {
+                                <tr>
+                                    <td><strong>@row.Zone</strong></td>
+                                    <td class="text-center">@row.Price.ToString("N0")</td>
+                                    <td class="text-center">@row.TotalSeats</td>
+                                    <td class="text-center text-danger fw-bold">@row.SoldSeats</td>
+                                    <td class="text-center text-success fw-bold">@row.AvailableSeats</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height:10px;">
+                                                <div class="progress-bar
+                                                    @(row.SoldPercentage >= 80 ? "bg-danger" :
+                                                      row.SoldPercentage >= 50 ? "bg-warning" : "bg-success")"
+                                                     style="width:@row.SoldPercentage.ToString("F1")%;">
+                                                </div>
+                                            </div>
+                                            <small class="text-nowrap">@row.SoldPercentage.ToString("F1")%</small>
+                                        </div>
+                                    </td>
+                                    <td class="text-end fw-bold">@row.Revenue.ToString("N0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-dark">
+                            <tr>
+                                <td><strong>合計</strong></td>
+                                <td class="text-center">-</td>
+                                <td class="text-center"><strong>@Model.TotalSeats</strong></td>
+                                <td class="text-center"><strong>@Model.TotalSold</strong></td>
+                                <td class="text-center"><strong>@Model.TotalAvailable</strong></td>
+                                <td><strong>@Model.TotalSoldPercentage.ToString("F1")%</strong></td>
+                                <td class="text-end"><strong>@Model.TotalRevenue.ToString("N0")</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 訂單統計 -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fa fa-shopping-cart me-2"></i> 訂單統計</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h4 class="text-primary">@Model.TotalOrders</h4>
+                        <p class="text-muted mb-0">總訂單數</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h4 class="text-success">@Model.PaidOrders</h4>
+                        <p class="text-muted mb-0">已付款訂單</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h4 class="text-danger">@Model.CancelledOrders</h4>
+                        <p class="text-muted mb-0">已取消訂單</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (eventId != null)
+    {
+        <div class="alert alert-warning">
+            <i class="fa fa-exclamation-triangle me-2"></i> 找不到此活動的銷售資料
+        </div>
+    }
+</div>

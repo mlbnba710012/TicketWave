@@ -1,0 +1,163 @@
+@model IEnumerable<TicketWave.Repository.Entity.ContactMessage>
+
+@{
+    ViewData["Title"] = "聯絡留言管理";
+    int? selectedStatus = ViewBag.SelectedStatus as int?;
+    string selectedCategory = ViewBag.SelectedCategory as string ?? "";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fa fa-envelope me-2"></i> 聯絡留言管理</h2>
+        </div>
+    </div>
+
+    <!-- 統計卡片 -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white" style="background:linear-gradient(135deg,#6c757d,#495057);">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="opacity-75">全部留言</h6>
+                        <h2 class="mb-0">@ViewBag.TotalCount</h2>
+                    </div>
+                    <i class="fa fa-envelope fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="opacity-75">未處理</h6>
+                        <h2 class="mb-0">@ViewBag.PendingCount</h2>
+                    </div>
+                    <i class="fa fa-exclamation-circle fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="opacity-75">處理中</h6>
+                        <h2 class="mb-0">@ViewBag.ProcessingCount</h2>
+                    </div>
+                    <i class="fa fa-spinner fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="opacity-75">已回覆</h6>
+                        <h2 class="mb-0">@ViewBag.RepliedCount</h2>
+                    </div>
+                    <i class="fa fa-check-circle fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-white">
+            <div class="row align-items-center g-2">
+                <div class="col-md-3"><h5 class="mb-0">留言列表</h5></div>
+                <div class="col-md-9">
+                    <form method="get" class="row g-2">
+                        <div class="col-md-4">
+                            <select name="category" class="form-select">
+                                <option value="">全部類別</option>
+                                <option value="訂單問題" selected="@(selectedCategory == "訂單問題")">🛒 訂單問題</option>
+                                <option value="帳號問題" selected="@(selectedCategory == "帳號問題")">👤 帳號問題</option>
+                                <option value="票券問題" selected="@(selectedCategory == "票券問題")">🎫 票券問題</option>
+                                <option value="付款問題" selected="@(selectedCategory == "付款問題")">💳 付款問題</option>
+                                <option value="其他" selected="@(selectedCategory == "其他")">❓ 其他</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select name="status" class="form-select">
+                                <option value="">全部狀態</option>
+                                <option value="0" selected="@(selectedStatus == 0)">未處理</option>
+                                <option value="1" selected="@(selectedStatus == 1)">處理中</option>
+                                <option value="2" selected="@(selectedStatus == 2)">已回覆</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fa fa-search"></i> 篩選
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary w-100">
+                                <i class="fa fa-refresh"></i> 重置
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>狀態</th>
+                                <th>類別</th>
+                                <th>姓名</th>
+                                <th>Email</th>
+                                <th>主旨</th>
+                                <th>留言時間</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var msg in Model)
+                            {
+                                <tr class="@(msg.Status == 0 ? "table-danger" : "")">
+                                    <td>
+                                        @if (msg.Status == 0)
+                                        {
+                                            <span class="badge bg-danger">未處理</span>
+                                        }
+                                        else if (msg.Status == 1)
+                                        {
+                                            <span class="badge bg-warning text-dark">處理中</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">已回覆</span>
+                                        }
+                                    </td>
+                                    <td><small>@msg.Category</small></td>
+                                    <td><strong>@msg.Name</strong></td>
+                                    <td><small class="text-muted">@msg.Email</small></td>
+                                    <td>@msg.Subject</td>
+                                    <td><small>@msg.CreateDate.ToString("yyyy/MM/dd HH:mm")</small></td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@msg.MessageId"
+                                           class="btn btn-sm btn-info">
+                                            <i class="fa fa-eye"></i> 查看
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-muted mt-2">共 @Model.Count() 筆留言</p>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fa fa-envelope fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">目前沒有留言</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

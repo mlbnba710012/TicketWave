@@ -6,6 +6,7 @@ using TicketWave.Service.Services.Implement;
 using TicketWave.Service.Services.Interface;
 using TicketWave.Web.Extensions;
 using TicketWave.Web.Profiles;
+using TicketWave.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,8 @@ builder.Services.AddDbContext<TicketWaveContext>(
 
 // 註冊 service and repository
 builder.Services.AddFeatureServices();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // ? 正確的 Session 設定（修復 Cookie 問題）
 builder.Services.AddSession(options =>

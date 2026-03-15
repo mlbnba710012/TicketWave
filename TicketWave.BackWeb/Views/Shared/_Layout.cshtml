@@ -140,6 +140,17 @@
                         <i class="fa fa-shopping-cart"></i> 訂單管理
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Contact" asp-action="Index">
+                        <i class="fa fa-envelope"></i> 聯絡留言管理
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Report" asp-action="Index">
+                        <i class="fa fa-bar-chart"></i> 銷售報表
+                    </a>
+                </li>
+
                 <li class="sidebar-heading">系統</li>
                 <li class="nav-item">
                     @if (!string.IsNullOrEmpty(Context.Session.GetString("AdminUsername")))
