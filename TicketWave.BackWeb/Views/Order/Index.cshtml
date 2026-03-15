@@ -13,20 +13,33 @@
 
     <div class="card">
         <div class="card-header bg-white">
-            <div class="row align-items-center">
-                <div class="col-md-4">
+            <div class="row align-items-center g-2">
+                <div class="col-md-3">
                     <h5 class="mb-0">訂單列表</h5>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-9">
                     <form method="get" class="row g-2">
-                        <div class="col-md-6">
+                        <!-- 搜尋關鍵字 -->
+                        <div class="col-md-4">
                             <input type="text"
                                    name="searchTerm"
                                    class="form-control"
-                                   placeholder="搜尋訂單編號、會員姓名或Email..."
+                                   placeholder="搜尋訂單編號、姓名或Email..."
                                    value="@ViewBag.SearchTerm">
                         </div>
-                        <div class="col-md-4">
+
+                        <!-- 活動類型篩選 -->
+                        <div class="col-md-3">
+                            <select name="eventType" class="form-select">
+                                <option value="">全部類型</option>
+                                <option value="concert" selected="@(ViewBag.SelectedEventType == "concert")">演唱會</option>
+                                <option value="sport" selected="@(ViewBag.SelectedEventType == "sport")">運動賽事</option>
+                                <option value="theater" selected="@(ViewBag.SelectedEventType == "theater")">表演藝術</option>
+                            </select>
+                        </div>
+
+                        <!-- 訂單狀態篩選 -->
+                        <div class="col-md-3">
                             <select name="status" class="form-select">
                                 <option value="">全部狀態</option>
                                 <option value="0" selected="@(ViewBag.SelectedStatus == 0)">未付款</option>
@@ -34,6 +47,7 @@
                                 <option value="2" selected="@(ViewBag.SelectedStatus == 2)">已取消</option>
                             </select>
                         </div>
+
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="fa fa-search"></i> 搜尋
@@ -43,6 +57,7 @@
                 </div>
             </div>
         </div>
+
         <div class="card-body">
             @if (Model.Any())
             {
@@ -52,6 +67,7 @@
                             <tr>
                                 <th>訂單編號</th>
                                 <th>會員</th>
+                                <th>活動類型</th>
                                 <th>訂單金額</th>
                                 <th>訂購時間</th>
                                 <th>付款時間</th>
@@ -63,14 +79,37 @@
                             @foreach (var order in Model)
                             {
                                 <tr>
-                                    <td><small class="font-monospace">@order.OrderId.ToString().Substring(0, 8)</small></td>
+                                    <td><small class="font-monospace">@order.OrderNumber</small></td>
                                     <td>
                                         <strong>@order.Member?.Name</strong><br>
                                         <small class="text-muted">@order.Member?.Email</small>
                                     </td>
+                                    <td>
+                                        @if (order.ConcertId.HasValue)
+                                        {
+                                            <span class="badge bg-success">演唱會</span>
+                                        }
+                                        else if (order.SportId.HasValue)
+                                        {
+                                            <span class="badge" style="background-color:#1a73e8;">運動賽事</span>
+                                        }
+                                        else if (order.TheaterId.HasValue)
+                                        {
+                                            <span class="badge" style="background-color:#764ba2;">表演藝術</span>
+                                        }
+                                    </td>
                                     <td><strong>$@order.TotalAmount.ToString("N0")</strong></td>
                                     <td>@order.CreateDate.ToString("yyyy/MM/dd HH:mm")</td>
-                                    <td>@(order.UpdateDate.ToString("yyyy/MM/dd HH:mm") ?? "-")</td>
+                                    <td>
+                                        @if (order.PaymentDate.HasValue)
+                                        {
+                                            @order.PaymentDate.Value.ToString("yyyy/MM/dd HH:mm")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
                                     <td>
                                         @if (order.OrderStatus == 0)
                                         {
@@ -105,7 +144,9 @@
                 <div class="text-center py-5">
                     <i class="fa fa-shopping-cart fa-3x text-muted mb-3"></i>
                     <p class="text-muted">
-                        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+                        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string) ||
+                             !string.IsNullOrEmpty(ViewBag.SelectedEventType as string) ||
+                             ViewBag.SelectedStatus != null)
                         {
                             <text>找不到符合條件的訂單</text>
                         }

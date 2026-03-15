@@ -56,49 +56,10 @@ namespace TicketWave.Web.Controllers
         [ValidateAntiForgeryToken] // 加入安全性標籤
         public async Task<IActionResult> Register(RegisterParameter parameter)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    return View();
-            //}
-
-            ////正常非陣列做法
-            //var info = new RegisterInfo
-            //{
-            //    NationalID = parameter.NationalID,
-            //    Phone = parameter.Phone,
-            //    Email = parameter.Email,
-            //    Password = parameter.Password
-
-            //};
-
-            ////陣列做法
-            //var listInfo = new List<RegisterInfo>();
-            //var info2 = new RegisterInfo();
-
-            //foreach(var item in listInfo)
-            //{
-            //    info2 = new RegisterInfo();
-            //    info2.NationalID = item.NationalID;
-            //    info2.Phone = item.Phone;
-            //    info2.Email = item.Email;
-            //    info2.Password = item.Password;
-
-            //    listInfo.Add(info2);
-            //}
-            //ModelState.Clear();
-
             if (!ModelState.IsValid)
             {
                 return View(parameter);  // ← 返回 View 並顯示驗證錯誤
             }
-
-
-            //var emailExists = await _memberService.GetByEmail(parameter.Email);
-            //if (emailExists != null)
-            //{
-            //    ModelState.AddModelError("", "此 Email 已被使用");
-            //    return View();
-            //}
 
             var info = _mapper.Map<RegisterInfo>(parameter);
             var result = await _memberService.Register(info);
@@ -106,7 +67,6 @@ namespace TicketWave.Web.Controllers
             {
                 TempData["SuccessMessage"] = "註冊成功！請登入";
                 return RedirectToAction("Login");
-                //return View();
             }
 
             // 註冊失敗
@@ -132,18 +92,9 @@ namespace TicketWave.Web.Controllers
             var result = await _memberService.Login(email, password);
             if (!result.Success)
             {
-                //ModelState.AddModelError("", "登入失敗，請檢查您的 Email 和密碼。");
                 ModelState.AddModelError("", result.Message);
                 return View();
             }
-
-            //var member = await _memberService.GetByEmail(email);
-            //if (member != null)
-            //{
-            //    HttpContext.Session.SetString("MemberId", member.MemberId.ToString());
-            //    HttpContext.Session.SetString("MemberName", member.Name ?? "會員");
-            //    HttpContext.Session.SetString("MemberEmail", member.Email);
-            //}
 
             if (result.Member != null)
             {
@@ -152,17 +103,9 @@ namespace TicketWave.Web.Controllers
                 HttpContext.Session.SetString("MemberEmail", result.Member.Email);
             }
 
-
             // 登錄成功，重定向到首頁或其他頁面
             return RedirectToAction("Index", "Home");
         }
-
-        //public async Task<IActionResult> Logout()
-        //{
-        //    await _memberService.Logout();
-        //    return RedirectToAction("Index", "Home");
-        //}
-
 
         // <summary>
         // 個人資料頁面
@@ -230,12 +173,6 @@ namespace TicketWave.Web.Controllers
                 // 保存變更
                 var result = await _memberService.UpdateMemberProfile(new UpdateMemberProfileInfo
                 {
-                    //MemberId = existingMember.MemberId,
-                    //Name = existingMember.Name,
-                    //Phone = existingMember.Phone,
-                    //BirthDate = existingMember.BirthDate,
-                    //Address = existingMember.Address
-
                     MemberId = memberId,
                     Name = member.Name,
                     Phone = member.Phone,
@@ -244,15 +181,8 @@ namespace TicketWave.Web.Controllers
                 });
 
                 if (result)
-                //if (result != null)
                 {
-                    //_dbContext.Update(existingMember);
-                    //_dbContext.SaveChanges();
-
                     TempData["SuccessMessage"] = "個人資料更新成功！";
-
-                    // 更新 Session 中的姓名
-                    //HttpContext.Session.SetString("MemberName", existingMember.Name ?? "會員");
                     HttpContext.Session.SetString("MemberName", member.Name ?? "會員");
                 }
                 else
@@ -323,11 +253,7 @@ namespace TicketWave.Web.Controllers
                 if (result.Success)
                 {
                     TempData["SuccessMessage"] = result.Message;
-                    // 可以選擇：
-                    // 1. 留在修改密碼頁面
                     return RedirectToAction("ChangePassword");
-                    // 2. 或跳轉到個人資料頁面
-                    // return RedirectToAction("Profile");
                 }
                 else
                 {
@@ -497,7 +423,6 @@ namespace TicketWave.Web.Controllers
                 if (result)
                 {
                     TempData["SuccessMessage"] = "訂單已成功取消，座位已釋放";
-                    //return Json(new { success = true, message = "訂單已取消" });
                     return RedirectToAction("Orders");
                 }
                 else
@@ -549,7 +474,30 @@ namespace TicketWave.Web.Controllers
                     return RedirectToAction("Orders");
                 }
 
-                var concertId = order.ConcertId;
+                // ✅ 修正：判斷活動類型決定跳轉目標
+                string targetController;
+                object routeValues;
+
+                if (order.ConcertId.HasValue)
+                {
+                    targetController = "Concert";
+                    routeValues = new { concertId = order.ConcertId.Value };
+                }
+                else if (order.SportId.HasValue)
+                {
+                    targetController = "Sport";
+                    routeValues = new { sportId = order.SportId.Value };
+                }
+                else if (order.TheaterId.HasValue)
+                {
+                    targetController = "Theater";
+                    routeValues = new { theaterId = order.TheaterId.Value };
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "找不到活動資訊";
+                    return RedirectToAction("Orders");
+                }
 
                 // 取消訂單（釋放座位）
                 var cancelResult = await _orderService.CancelOrder(orderId, memberId);
@@ -562,7 +510,7 @@ namespace TicketWave.Web.Controllers
 
                 // 跳轉到選座頁面
                 TempData["InfoMessage"] = "原訂單已取消，請重新選擇座位";
-                return RedirectToAction("SelectSeats", "Concert", new { concertId = concertId });
+                return RedirectToAction("SelectSeats", targetController, routeValues);
             }
             catch (Exception ex)
             {
@@ -609,33 +557,58 @@ namespace TicketWave.Web.Controllers
                     return RedirectToAction("Orders");
                 }
 
-                // 檢查該會員在這場演唱會已購買的總票數
-                var currentTicketCount = await _orderService.GetMemberTicketCountForConcert(memberId, order.ConcertId);
+                // ✅ 修正：判斷活動類型並取得對應的 eventId 和跳轉目標
+                string eventType;
+                Guid eventId;
+                string targetController;
+                object routeValues;
+
+                if (order.ConcertId.HasValue)
+                {
+                    eventType = "concert";
+                    eventId = order.ConcertId.Value;
+                    targetController = "Concert";
+                    routeValues = new { concertId = order.ConcertId.Value };
+                }
+                else if (order.SportId.HasValue)
+                {
+                    eventType = "sport";
+                    eventId = order.SportId.Value;
+                    targetController = "Sport";
+                    routeValues = new { sportId = order.SportId.Value };
+                }
+                else if (order.TheaterId.HasValue)
+                {
+                    eventType = "theater";
+                    eventId = order.TheaterId.Value;
+                    targetController = "Theater";
+                    routeValues = new { theaterId = order.TheaterId.Value };
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "找不到活動資訊";
+                    return RedirectToAction("Orders");
+                }
+
+                // ✅ 修正：傳入三個參數
+                var currentTicketCount = await _orderService.GetMemberTicketCountForEvent(memberId, eventId, eventType);
 
                 // 檢查是否已達上限（4張）
                 if (currentTicketCount >= 4)
                 {
-                    TempData["ErrorMessage"] = "您已達到此場演唱會的購票上限（4張）";
+                    TempData["ErrorMessage"] = "您已達到此場活動的購票上限（4張）";
                     return RedirectToAction("Orders");
                 }
 
                 // 計算剩餘可購買數量
                 var remainingQuota = 4 - currentTicketCount;
 
-                // 查詢演唱會資訊
-                var concert = await _dbContext.Concerts.FindAsync(order.ConcertId);
-                if (concert == null)
-                {
-                    TempData["ErrorMessage"] = "找不到演唱會資訊";
-                    return RedirectToAction("Orders");
-                }
-
                 // 儲存訂單 ID 到 Session（用於後續新增座位）
                 HttpContext.Session.SetString("AddToOrderId", orderId.ToString());
                 HttpContext.Session.SetInt32("RemainingQuota", remainingQuota);
 
                 // 導向區域選擇頁面
-                return RedirectToAction("SelectZone", "Concert", new { concertId = order.ConcertId });
+                return RedirectToAction("SelectZone", targetController, routeValues);
             }
             catch (Exception ex)
             {
@@ -648,7 +621,7 @@ namespace TicketWave.Web.Controllers
 
         //付款頁面
         [HttpGet]
-        public async Task<IActionResult> Payment(Guid orderId) 
+        public async Task<IActionResult> Payment(Guid orderId)
         {
             try
             {
@@ -660,8 +633,6 @@ namespace TicketWave.Web.Controllers
                 }
 
                 var memberId = Guid.Parse(memberIdStr);
-                //var order = await _dbContext.Orders.Include(o => o.ConcertId).FirstOrDefaultAsync(o => o.OrderId == orderid && o.MemberId == memberId.Value);
-                // 先查詢訂單資訊
                 var order = await _dbContext.Orders
                     .FirstOrDefaultAsync(o => o.OrderId == orderId && o.MemberId == memberId);
 
@@ -689,10 +660,8 @@ namespace TicketWave.Web.Controllers
                 ViewBag.OrderDetails = orderDetails;
 
                 return View(order);
-
             }
-
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "載入付款頁面失敗");
                 TempData["ErrorMessage"] = "載入付款頁面失敗";
@@ -714,7 +683,6 @@ namespace TicketWave.Web.Controllers
                     return RedirectToAction("Login");
                 }
                 var memberId = Guid.Parse(memberIdStr);
-
 
                 //查詢訂單
                 var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId && o.MemberId == memberId);
@@ -741,27 +709,14 @@ namespace TicketWave.Web.Controllers
 
                 if (paymentMethod == "credit_card")
                 {
-                    //驗證信用卡資訊(模擬)
                     if (string.IsNullOrEmpty(cardNumber) || cardNumber.Length != 16)
-                    {
-                        //TempData["ErrorMessage"] = "請輸入正確的信用卡號碼(16碼)";
                         return Json(new { success = false, message = "請輸入正確的信用卡號碼(16碼)" });
-                        //return RedirectToAction("Payment", new { orderId });
-                    }
 
                     if (string.IsNullOrEmpty(cardExpiry) || !DateTime.TryParseExact(cardExpiry, "MM/yy", null, System.Globalization.DateTimeStyles.None, out DateTime expiryDate) || expiryDate < DateTime.Now)
-                    {
-                        //TempData["ErrorMessage"] = "請輸入有效的信用卡到期日(MM/YY)";
-                        //return RedirectToAction("Payment", new { orderId });
                         return Json(new { success = false, message = "請輸入有效的信用卡到期日(MM/YY)" });
-                    }
 
                     if (string.IsNullOrEmpty(cardCvv) || cardCvv.Length != 3)
-                    {
-                        //TempData["ErrorMessage"] = "請輸入正確的CVV碼(安全碼共3碼)";
-                        //return RedirectToAction("Payment", new { orderId });
                         return Json(new { success = false, message = "請輸入正確的CVV碼(安全碼共3碼)" });
-                    }
                 }
 
                 //模擬付款處理
@@ -776,32 +731,12 @@ namespace TicketWave.Web.Controllers
                 await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation($"訂單 {orderId} 已成功付款，付款方式：{paymentMethod}");
-                //logger.LogInformation($"訂單付款成功：OrderId={orderId}, Amount={order.TotalAmount}");
                 return Json(new { success = true, message = "付款成功！", orderId = orderId.ToString() });
-                //return RedirectToAction("OrderDetail", new { orderId });
-
-
-                //return Json(new
-                //{
-                //    success = true,
-                //    message = "付款成功！",
-                //    orderId = orderId.ToString()
-                //});
-
             }
-
             catch (Exception ex)
             {
                 _logger.LogError(ex, "付款處理失敗");
                 return Json(new { success = false, message = "付款處理失敗，請稍後再試" });
-
-                //TempData["ErrorMessage"] = "付款處理失敗，請稍後再試";
-                //return RedirectToAction("Payment", new { orderId });
-                //return Json(new
-                //{
-                //    success = false,
-                //    message = "付款處理失敗，請稍後再試"
-                //});
             }
         }
 
@@ -841,33 +776,12 @@ namespace TicketWave.Web.Controllers
             }
         }
 
-
-
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Logout()
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            //ViewData["SuccessMessage"] = "您已成功登出";
             return RedirectToAction("Index", "Home");
         }
-
-
-        //public async Task<IActionResult> UpdateMemberProfile(UpdateMemberProfileParameter parameter)
-        //{
-        //    var info = _mapper.Map<UpdateMemberProfileInfo>(parameter);
-        //    var member = await _memberService.UpdateMemberProfile(info);
-
-        //    return View();
-        //}
-
-        //public async Task<IActionResult> DeleteMember(Guid memberId)
-        //{
-        //    var member = await _memberService.GetById(memberId);
-        //    if (member == null) return NotFound();
-        //    return View(member);
-        //}
     }
 }

@@ -1,0 +1,452 @@
+@model List<TicketWave.Web.Models.ZoneViewModel>
+@{
+    ViewData["Title"] = "選擇區域";
+    var sport = ViewBag.Sport as TicketWave.Repository.Entity.Sport;
+
+    var zoneOrder = new Dictionary<string, int>
+    {
+        { "VIP區",     1 },
+        { "紅區",      2 },
+        { "綠區",      3 },
+        { "紫區",      4 },
+        { "黃區",      5 },
+        { "1樓籃框後", 6 }
+    };
+
+    string Fill(TicketWave.Web.Models.ZoneViewModel z, string color)
+        => z == null ? "#4b5563" : (z.IsSoldOut ? "#64748b" : color);
+    string Status(TicketWave.Web.Models.ZoneViewModel z)
+        => z == null ? "" : (z.IsSoldOut ? "已售罄" : $"剩 {z.AvailableSeats} 席");
+    string Price(TicketWave.Web.Models.ZoneViewModel z)
+        => z == null ? "" : $"NT${z.MinPrice:N0}";
+    string Cls(TicketWave.Web.Models.ZoneViewModel z)
+        => z == null || z.IsSoldOut ? "sold-out" : "available";
+    string Click(TicketWave.Web.Models.ZoneViewModel z, string name)
+        => z == null ? "" : $"selectZone('{name}',{z.IsSoldOut.ToString().ToLower()})";
+}
+
+<section class="banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6"><h1 class="banner-header">選擇區域</h1></div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/Index">Home</a>
+                                <a href="/Sport/Index">Sports</a>
+                                <a href="#">Select Zone</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section style="background-color:#f8f9fa;padding:30px 0;">
+    <div class="container">
+        <div class="card shadow">
+            <div class="card-header" style="background:linear-gradient(135deg,#1a73e8,#0d47a1);color:white;">
+                <h3 class="mb-0"><i class="fa fa-futbol-o"></i> @sport.SportName</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong>主場：</strong>@sport.HomeTeam</p>
+                        <p><strong>客場：</strong>@sport.AwayTeam</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>比賽時間：</strong>@sport.PerformanceDate.ToString("yyyy/MM/dd HH:mm")</p>
+                        <p><strong>場館：</strong>@sport.VenueName</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p>
+                            <strong>剩餘座位：</strong>
+                            <span style="color:#28a745;font-weight:bold;font-size:18px;">@sport.AvailableSeats</span> / @sport.TotalSeats
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section style="padding:50px 0;background:#fff;">
+    <div class="container-fluid" style="max-width:1400px;">
+        <header class="section-header text-center mb-4">
+            <h3>選擇座位區域</h3>
+            <p style="color:#6c757d;">點擊座位區域或右側按鈕進行選位</p>
+        </header>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="venue-map-container">
+                    <div class="text-center mb-2">
+                        <h5 style="color:#e2e8f0;font-weight:bold;">@sport.VenueName</h5>
+                        <p style="color:#94a3b8;font-size:13px;">Basketball Arena Seating Map</p>
+                    </div>
+
+                    @{
+                        var vip = Model.FirstOrDefault(z => z.ZoneName == "VIP區");
+                        var red = Model.FirstOrDefault(z => z.ZoneName == "紅區");
+                        var green = Model.FirstOrDefault(z => z.ZoneName == "綠區");
+                        var purple = Model.FirstOrDefault(z => z.ZoneName == "紫區");
+                        var yellow = Model.FirstOrDefault(z => z.ZoneName == "黃區");
+                        var back = Model.FirstOrDefault(z => z.ZoneName == "1樓籃框後");
+                    }
+
+                    @*
+                        佈局說明（由外到內，上下結構）：
+                        ┌─────────────────────────────────┐
+                        │         紅區（上方橫排）           │
+                        ├──────┬───────────────┬──────────┤
+                        │      │  1樓籃框後(上) │          │
+                        │      ├───────────────┤          │
+                        │ 藍區 │   VIP | COURT | VIP │ 黃區│
+                        │(左)  ├───────────────┤   (右)   │
+                        │      │  1樓籃框後(下) │          │
+                        ├──────┴───────────────┴──────────┤
+                        │         紫區（下方橫排）           │
+                        └─────────────────────────────────┘
+
+                        座標規劃（viewBox 0 0 860 620）：
+                        球場：x=330 y=210 w=200 h=200  → 中心(430,310)
+                        VIP長邊（左右）：x=318/518 y=210 w=14 h=200
+                        VIP短邊（上下）：x=318 y=198/408 w=214 h=14
+                        1樓籃框後：x=318 y=168  h=32（上）/ y=408 h=32（下，VIP下方）
+                        紅區：x=200 y=100 w=460 h=70
+                        紫區：x=200 y=450 w=460 h=70
+                        藍區（左矩形）：x=100 y=168 w=120 h=274
+                        黃區（右矩形）：x=640 y=168 w=120 h=274
+                    *@
+
+                    <svg viewBox="0 0 860 620" class="venue-map">
+                        <defs>
+                            <filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.35" /></filter>
+                            <linearGradient id="court" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#bfdbfe" />
+                                <stop offset="100%" style="stop-color:#93c5fd" />
+                            </linearGradient>
+                        </defs>
+
+                        <!-- ===== 紅區（上方橫排）===== -->
+                        @if (red != null)
+                        {
+                            <g class="zone-area @Cls(red)" data-zone="紅區" onclick="@Click(red, "紅區")">
+                                <rect x="200" y="100" width="460" height="70" rx="6"
+                                      fill="@Fill(red, "#dc2626")" stroke="#fff" stroke-width="2" filter="url(#sh)" class="zone-path" />
+                                <text x="430" y="131" text-anchor="middle" font-size="20" font-weight="bold" fill="white">紅區</text>
+                                <text x="430" y="153" text-anchor="middle" font-size="13" fill="white">@Price(red)　@Status(red)</text>
+                            </g>
+                        }
+
+                        <!-- ===== 紫區（下方橫排）===== -->
+                        @if (purple != null)
+                        {
+                            <g class="zone-area @Cls(purple)" data-zone="紫區" onclick="@Click(purple, "紫區")">
+                                <rect x="200" y="450" width="460" height="70" rx="6"
+                                      fill="@Fill(purple, "#7c3aed")" stroke="#fff" stroke-width="2" filter="url(#sh)" class="zone-path" />
+                                <text x="430" y="481" text-anchor="middle" font-size="20" font-weight="bold" fill="white">紫區</text>
+                                <text x="430" y="503" text-anchor="middle" font-size="13" fill="white">@Price(purple)　@Status(purple)</text>
+                            </g>
+                        }
+
+                        <!-- ===== 綠區（左側矩形）===== -->
+                        @if (green != null)
+                        {
+                            <g class="zone-area @Cls(green)" data-zone="綠區" onclick="@Click(green, "綠區")">
+                                <rect x="60" y="168" width="130" height="284" rx="6"
+                                      fill="@Fill(green, "#16a34a")" stroke="#fff" stroke-width="2" filter="url(#sh)" class="zone-path" />
+                                <text x="125" y="300" text-anchor="middle" font-size="18" font-weight="bold" fill="white">綠區</text>
+                                <text x="125" y="322" text-anchor="middle" font-size="13" fill="white">@Price(green)</text>
+                                <text x="125" y="340" text-anchor="middle" font-size="12" fill="@(green == null || green.IsSoldOut ? "#fca5a5" : "#86efac")" font-weight="bold">@Status(green)</text>
+                            </g>
+                        }
+
+                        <!-- ===== 黃區（右側矩形）===== -->
+                        @if (yellow != null)
+                        {
+                            <g class="zone-area @Cls(yellow)" data-zone="黃區" onclick="@Click(yellow, "黃區")">
+                                <rect x="670" y="168" width="130" height="284" rx="6"
+                                      fill="@Fill(yellow, "#eab308")" stroke="#fff" stroke-width="2" filter="url(#sh)" class="zone-path" />
+                                <text x="735" y="300" text-anchor="middle" font-size="18" font-weight="bold" fill="#1e293b">黃區</text>
+                                <text x="735" y="322" text-anchor="middle" font-size="13" fill="#1e293b">@Price(yellow)</text>
+                                <text x="735" y="340" text-anchor="middle" font-size="12" fill="@(yellow == null || yellow.IsSoldOut ? "#dc2626" : "#15803d")" font-weight="bold">@Status(yellow)</text>
+                            </g>
+                        }
+
+                        <!-- ===== 1樓籃框後（球場短邊，紅區/紫區前）===== -->
+                        @* @if (back != null)
+                        {
+                            <g class="zone-area @Cls(back)" data-zone="1樓籃框後" onclick="@Click(back, "1樓籃框後")">
+                                <!-- 上籃框後（在紅區下方、VIP上方） -->
+                                <rect x="318" y="172" width="224" height="30" rx="4"
+                                      fill="@Fill(back, "#1d4ed8")" stroke="#fff" stroke-width="2" filter="url(#sh)" class="zone-path" />
+                                <text x="430" y="191" text-anchor="middle" font-size="12" font-weight="bold" fill="white">1樓籃框後　@Price(back)　@Status(back)</text>
+                                <!-- 下籃框後（在VIP下方、紫區上方） -->
+                                <rect x="318" y="418" width="224" height="30" rx="4"
+                                      fill="@Fill(back, "#1d4ed8")" stroke="#fff" stroke-width="2" filter="url(#sh)" class="zone-path" />
+                                <text x="430" y="437" text-anchor="middle" font-size="12" font-weight="bold" fill="white">1樓籃框後</text>
+                            </g>
+                        } *@
+
+                        @if (back != null)
+                        {
+                            <g class="zone-area @Cls(back)" data-zone="1樓籃框後" onclick="@Click(back, "1樓籃框後")">
+                                <!-- 左側籃框後 -->
+                                <rect x="198" y="214" width="30" height="192" rx="4"
+                                      fill="@Fill(back, "#1d4ed8")" stroke="#fff" stroke-width="2" filter="url(#sh)" class="zone-path" />
+
+                                <!-- 右側籃框後 -->
+                                <rect x="631" y="214" width="30" height="192" rx="4"
+                                      fill="@Fill(back, "#1d4ed8")" stroke="#fff" stroke-width="2" filter="url(#sh)" class="zone-path" />
+
+                                @* <!-- 上方文字 -->
+                                <text x="430" y="208" text-anchor="middle" font-size="12" font-weight="bold" fill="#f59e0b">
+                                    1樓籃框後　@Price(back)　@Status(back)
+                                </text> *@
+
+                                <!-- 左籃框後標籤 -->
+                                <text x="215" y="310" 
+                                      text-anchor="middle" 
+                                      font-size="15" font-weight="bold" fill="white"
+                                      transform="rotate(90, 215, 310)">
+                                    1樓籃框後 @Price(back)
+                                </text>
+
+                                <!-- 右籃框後標籤 -->
+                                <text x="645" y="310"
+                                      text-anchor="middle"
+                                      font-size="15" font-weight="bold" fill="white"
+                                      transform="rotate(90, 645, 310)">
+                                    1樓籃框後 @Status(back)
+                                </text>
+                                @* <text text-anchor="middle" font-size="11" font-weight="bold" fill="white">
+                                    <tspan x="200" dy="0">1</tspan>
+                                    <tspan x="200" dy="220">樓</tspan>
+                                    <tspan x="200" dy="220">籃</tspan>
+                                    <tspan x="200" dy="220">框</tspan>
+                                    <tspan x="200" dy="220">後</tspan>
+                                </text> *@
+
+
+                            </g>
+                        }
+
+                       
+
+                        <!-- ===== VIP（球場四周長邊細條）===== -->
+                        @if (vip != null)
+                        {
+                            <g class="zone-area @Cls(vip)" data-zone="VIP區" onclick="@Click(vip, "VIP區")">
+                                <!-- 上VIP（球場上長邊） -->
+                                <rect x="223" y="190" width="414" height="20" rx="3"
+                                      fill="@Fill(vip, "#f59e0b")" stroke="#fff" stroke-width="1" class="zone-path" />
+                                <!-- 下VIP（球場下長邊） -->
+                                <rect x="223" y="410" width="414" height="20" rx="3"
+                                      fill="@Fill(vip, "#f59e0b")" stroke="#fff" stroke-width="1" class="zone-path" />
+                                <!-- 左VIP（球場左短邊） -->
+                                @* <rect x="223" y="214" width="12" height="192" rx="3"
+                                      fill="@Fill(vip, "#f59e0b")" stroke="#fff" stroke-width="1" class="zone-path" /> *@
+                                <!-- 右VIP（球場右短邊） -->
+                                @* <rect x="625" y="214" width="12" height="192" rx="3"
+                                      fill="@Fill(vip, "#f59e0b")" stroke="#fff" stroke-width="1" class="zone-path" /> *@
+                                <!-- 標籤 -->
+                                <text x="430" y="202" text-anchor="middle" font-size="15" font-weight="bold" fill="black">VIP　@Price(vip)　@Status(vip)</text>
+                                <text x="430" y="422" text-anchor="middle" font-size="15" font-weight="bold" fill="black">VIP　@Price(vip)　@Status(vip)</text>
+                            </g>
+                        }
+
+                        <!-- ===== 球場地板 ===== -->
+                        <rect x="235" y="214" width="390" height="192" rx="4" fill="url(#court)" stroke="#60a5fa" stroke-width="2" />
+                        <!-- 中線 -->
+                        @* <line x1="235" y1="310" x2="530" y2="310" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="5 4" /> *@
+                        <!-- 中圓 -->
+                        @* <circle cx="430" cy="310" r="28" fill="none" stroke="#60a5fa" stroke-width="1.5" /> *@
+                        <!-- 左三分弧 -->
+                        @* <path d="M 340 225 Q 360 310 340 395" fill="none" stroke="#60a5fa" stroke-width="1.5" /> *@
+                        <!-- 右三分弧 -->
+                        @* <path d="M 520 225 Q 500 310 520 395" fill="none" stroke="#60a5fa" stroke-width="1.5" /> *@
+                        <!-- 球場文字 -->
+                        @* <text x="430" y="305" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e3a5f">🏀 COURT</text> *@
+                        <text x="430" y="322" text-anchor="middle" font-size="30" fill="#1e3a5f">比賽場地</text>
+                    </svg>
+
+                    <!-- 圖例 -->
+                    <div class="legend-container mt-3">
+                        <div class="legend-item"><div class="legend-box" style="background:#f59e0b;"></div><span>VIP區</span></div>
+                        <div class="legend-item"><div class="legend-box" style="background:#dc2626;"></div><span>紅區</span></div>
+                        <div class="legend-item"><div class="legend-box" style="background:#16a34a;"></div><span>綠區</span></div>
+                        <div class="legend-item"><div class="legend-box" style="background:#7c3aed;"></div><span>紫區</span></div>
+                        <div class="legend-item"><div class="legend-box" style="background:#eab308;"></div><span>黃區</span></div>
+                        <div class="legend-item"><div class="legend-box" style="background:#1d4ed8;"></div><span>1樓籃框後</span></div>
+                        <div class="legend-item"><div class="legend-box" style="background:#64748b;"></div><span>已售罄</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側：區域詳細資訊 -->
+            <div class="col-lg-4">
+                <div class="zone-info-panel">
+                    <h4 class="mb-4" style="color:#1e293b;font-weight:bold;border-bottom:3px solid #1a73e8;padding-bottom:10px;">
+                        <i class="fa fa-list"></i> 區域詳細資訊
+                    </h4>
+
+                    @{
+                        var colorMap = new Dictionary<string, string>
+                                        {
+                                        { "VIP區",     "#f59e0b" },
+                                        { "紅區",      "#dc2626" },
+                                        { "綠區",      "#16a34a" },
+                                        { "紫區",      "#7c3aed" },
+                                        { "黃區",      "#eab308" },
+                                        { "1樓籃框後", "#1d4ed8" }
+                                        };
+                        var orderedZones = Model
+                        .OrderBy(z => zoneOrder.ContainsKey(z.ZoneName) ? zoneOrder[z.ZoneName] : 99)
+                        .ThenBy(z => z.ZoneName);
+                    }
+
+                    @foreach (var zone in orderedZones)
+                    {
+                        var zc = colorMap.ContainsKey(zone.ZoneName) ? colorMap[zone.ZoneName] : "#6366f1";
+                        var bg = zone.IsSoldOut ? "#f1f5f9" : "#f8faff";
+
+                        <div class="zone-detail-card mb-2"
+                             style="border-left:5px solid @zc;background-color:@bg;"
+                             onmouseenter="highlightZone('@zone.ZoneName')"
+                             onmouseleave="unhighlightZone('@zone.ZoneName')">
+                            <div class="card-body p-3">
+                                <div class="row align-items-center">
+                                    <div class="col-5">
+                                        <h6 class="mb-1" style="color:@zc;font-weight:bold;">@zone.ZoneName</h6>
+                                        <p class="mb-0" style="font-size:18px;color:#dc2626;font-weight:bold;">
+                                            NT$ @zone.MinPrice.ToString("N0")
+                                        </p>
+                                    </div>
+                                    <div class="col-4">
+                                        <p class="mb-0" style="font-size:12px;color:#64748b;">剩餘</p>
+                                        <p class="mb-0" style="font-size:18px;font-weight:bold;color:@(zone.IsSoldOut ? "#dc2626" : "#059669");">
+                                            @zone.AvailableSeats
+                                            <small style="font-size:12px;color:#64748b;">/@zone.TotalSeats</small>
+                                        </p>
+                                        <div class="progress mt-1" style="height:6px;">
+                                            <div class="progress-bar" style="width:@zone.SoldPercentage%;background-color:@zc;" role="progressbar"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3 text-right">
+                                        @if (zone.IsSoldOut)
+                                        {
+                                            <button class="btn btn-sm btn-secondary" disabled style="width:100%;font-size:12px;">已售罄</button>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("SelectQuantity", "Sport", new { sportId = sport.SportId, zone = zone.ZoneName })"
+                                               class="btn btn-sm"
+                                               style="background-color:@zc;color:white;border-color:@zc;width:100%;font-size:12px;font-weight:bold;">
+                                                選此區
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .venue-map-container {
+        background: linear-gradient(135deg,#0f172a,#1e293b);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .venue-map {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .zone-area {
+        cursor: pointer;
+        transition: opacity .2s;
+    }
+
+        .zone-area.available:hover {
+            opacity: .8;
+        }
+
+        .zone-area.sold-out {
+            cursor: not-allowed;
+            opacity: .55;
+        }
+
+    .zone-path {
+        transition: all .2s;
+    }
+
+    .legend-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px;
+        background: #1e293b;
+        border-radius: 10px;
+        margin-top: 8px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #e2e8f0;
+    }
+
+    .legend-box {
+        width: 22px;
+        height: 16px;
+        border-radius: 3px;
+        border: 1px solid rgba(255,255,255,.3);
+    }
+
+    .zone-info-panel {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,.08);
+    }
+
+    .zone-detail-card {
+        border-radius: 8px;
+        transition: all .2s;
+        box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+        .zone-detail-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,.12);
+        }
+</style>
+
+<script>
+    function selectZone(name, sold) {
+        if (sold) { alert('此區域已售罄'); return; }
+        window.location.href = '@Url.Action("SelectQuantity", "Sport")?sportId=@sport.SportId&zone=' + encodeURIComponent(name);
+    }
+    function highlightZone(name) {
+        document.querySelectorAll(`.zone-area[data-zone="${name}"] .zone-path`).forEach(e => e.style.stroke = '#fff176');
+    }
+    function unhighlightZone(name) {
+        document.querySelectorAll(`.zone-area[data-zone="${name}"] .zone-path`).forEach(e => e.style.stroke = '');
+    }
+</script>

@@ -1,0 +1,86 @@
+@model IEnumerable<TicketWave.Repository.Entity.Sport>
+
+@{
+    ViewData["Title"] = "體育賽事管理";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2><i class="fa fa-trophy me-2"></i> 體育賽事管理</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fa fa-plus"></i> 新增賽事
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">體育賽事列表</h5>
+            <span class="badge bg-primary">共 @Model.Count() 場賽事</span>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>賽事名稱</th>
+                                <th>類型</th>
+                                <th>主場 vs 客場</th>
+                                <th>比賽日期</th>
+                                <th>場館</th>
+                                <th>總座位數</th>
+                                <th>剩餘座位</th>
+                                <th style="width: 200px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sport in Model)
+                            {
+                                var soldSeats = sport.TotalSeats - sport.AvailableSeats;
+                                var soldPercentage = sport.TotalSeats > 0 ? (soldSeats * 100.0 / sport.TotalSeats) : 0;
+                                <tr>
+                                    <td><strong>@sport.SportName</strong></td>
+                                    <td><span class="badge bg-info">@sport.SportType</span></td>
+                                    <td>@sport.HomeTeam vs @sport.AwayTeam</td>
+                                    <td>@sport.PerformanceDate.ToString("yyyy/MM/dd HH:mm")</td>
+                                    <td>@sport.VenueName</td>
+                                    <td>@sport.TotalSeats</td>
+                                    <td>
+                                        @sport.AvailableSeats
+                                        <small class="text-muted">(@soldPercentage.ToString("F1")% 已售)</small>
+                                    </td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@sport.SportId" class="btn btn-sm btn-info" title="詳情">
+                                            <i class="fa fa-eye"></i> 詳情
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@sport.SportId" class="btn btn-sm btn-warning" title="編輯">
+                                            <i class="fa fa-edit"></i> 編輯
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@sport.SportId" class="btn btn-sm btn-danger" title="刪除">
+                                            <i class="fa fa-trash"></i> 刪除
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fa fa-trophy fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-3">目前沒有體育賽事</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fa fa-plus"></i> 新增第一場賽事
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

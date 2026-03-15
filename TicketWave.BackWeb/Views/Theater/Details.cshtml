@@ -1,0 +1,235 @@
+@model TicketWave.Repository.Entity.Theater
+
+@{
+    ViewData["Title"] = "表演藝術詳情";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fa fa-ticket me-2"></i> 表演藝術詳情</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Edit" asp-route-id="@Model.TheaterId" class="btn btn-warning">
+                <i class="fa fa-edit"></i> 編輯
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i> 返回列表
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fa fa-info-circle me-2"></i> 基本資訊</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th style="width: 150px;">表演名稱</th>
+                            <td><strong class="text-primary">@Model.TheaterName</strong></td>
+                        </tr>
+                        <tr>
+                            <th>表演類型</th>
+                            <td><span class="badge" style="background-color:#764ba2;">@Model.TheaterType</span></td>
+                        </tr>
+                        @if (!string.IsNullOrEmpty(Model.Director))
+                        {
+                            <tr>
+                                <th>導演</th>
+                                <td>@Model.Director</td>
+                            </tr>
+                        }
+                        @if (Model.Duration.HasValue)
+                        {
+                            <tr>
+                                <th>演出時長</th>
+                                <td>@Model.Duration 分鐘</td>
+                            </tr>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Language))
+                        {
+                            <tr>
+                                <th>語言</th>
+                                <td>@Model.Language</td>
+                            </tr>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.AgeRating))
+                        {
+                            <tr>
+                                <th>年齡分級</th>
+                                <td>@Model.AgeRating</td>
+                            </tr>
+                        }
+                        <tr>
+                            <th>演出日期時間</th>
+                            <td>
+                                <i class="fa fa-calendar-alt text-muted me-2"></i>
+                                @Model.PerformanceDate.ToString("yyyy年MM月dd日 HH:mm")
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>場館名稱</th>
+                            <td>@Model.VenueName</td>
+                        </tr>
+                        <tr>
+                            <th>場館地址</th>
+                            <td>
+                                <i class="fa fa-map-marker-alt text-muted me-2"></i>
+                                @Model.VenueAddress
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>表演狀態</th>
+                            <td>
+                                @switch (Model.Status)
+                                {
+                                    case 0: <span class="badge bg-secondary">未開賣</span> break;
+                                    case 1: <span class="badge bg-success">售票中</span> break;
+                                    case 2: <span class="badge bg-danger">已售罄</span> break;
+                                    case 3: <span class="badge bg-dark">已結束</span> break;
+                                    case 4: <span class="badge bg-warning">已取消</span> break;
+                                }
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fa fa-ticket-alt me-2"></i> 售票資訊</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th style="width: 150px;">開始售票時間</th>
+                            <td>
+                                <i class="fa fa-clock text-success me-2"></i>
+                                @Model.SaleStartDate.ToString("yyyy/MM/dd HH:mm")
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>結束售票時間</th>
+                            <td>
+                                <i class="fa fa-clock text-danger me-2"></i>
+                                @Model.SaleEndDate.ToString("yyyy/MM/dd HH:mm")
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div class="card mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fa fa-align-left me-2"></i> 表演描述</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">@Model.Description</p>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.PosterImageUrl))
+            {
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fa fa-image me-2"></i> 表演海報</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="@Model.PosterImageUrl" alt="@Model.TheaterName" class="img-fluid" style="max-height: 500px;">
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fa fa-chair me-2"></i> 座位統計</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>總座位數</span>
+                            <strong class="text-primary">@ViewBag.TotalSeats</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span><i class="fa fa-check-circle text-success"></i> 可購買</span>
+                            <strong class="text-success">@ViewBag.AvailableSeats</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span><i class="fa fa-shopping-cart text-danger"></i> 已售出</span>
+                            <strong class="text-danger">@ViewBag.SoldSeats</strong>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small>售出進度</small>
+                            <small><strong>@ViewBag.SoldPercentage.ToString("F1")%</strong></small>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar" role="progressbar"
+                                 style="width: @ViewBag.SoldPercentage.ToString("F1")%; background-color:#764ba2;">
+                                @ViewBag.SoldPercentage.ToString("F1")%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fa fa-shopping-cart me-2"></i> 訂單統計</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <span>訂單總數</span>
+                        <strong class="text-primary">@ViewBag.OrderCount 筆</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fa fa-cog me-2"></i> 系統資訊</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted">表演 ID</td>
+                            <td class="text-end"><small class="font-monospace">@Model.TheaterId.ToString().Substring(0, 8)...</small></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">建立時間</td>
+                            <td class="text-end"><small>@Model.CreateDate.ToString("yyyy/MM/dd HH:mm")</small></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">最後更新</td>
+                            <td class="text-end"><small>@Model.UpdateDate.ToString("yyyy/MM/dd HH:mm")</small></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a asp-action="Edit" asp-route-id="@Model.TheaterId" class="btn btn-warning">
+                <i class="fa fa-edit"></i> 編輯表演
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.TheaterId" class="btn btn-danger">
+                <i class="fa fa-trash"></i> 刪除表演
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fa fa-list"></i> 返回列表
+            </a>
+        </div>
+    </div>
+</div>

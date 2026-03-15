@@ -12,9 +12,10 @@ public partial class TicketWaveContext : DbContext
         : base(options)
     {
     }
-
     public virtual DbSet<Concert> Concerts { get; set; }
-
+    public virtual DbSet<Sport> Sports { get; set; }
+    public virtual DbSet<Theater> Theaters { get; set; }
+    
     public virtual DbSet<Member> Members { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
@@ -33,6 +34,18 @@ public partial class TicketWaveContext : DbContext
 
             entity.Property(e => e.ConcertId).ValueGeneratedNever();
         });
+
+
+        modelBuilder.Entity<Sport>(entity =>
+        {
+            entity.Property(e => e.SportId).ValueGeneratedNever();
+        });
+
+        modelBuilder.Entity<Theater>(entity =>
+        {
+            entity.Property(e => e.TheaterId).ValueGeneratedNever();
+        });
+
 
         modelBuilder.Entity<Member>(entity =>
         {
@@ -78,9 +91,27 @@ public partial class TicketWaveContext : DbContext
 
             entity.Property(e => e.SeatId).ValueGeneratedNever();
 
+            // ConcertId nullable FK
             entity.HasOne(d => d.Concert).WithMany(p => p.Seats)
+                .HasForeignKey(d => d.ConcertId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Seat_Concert");
+
+            // SportId nullable FK
+            entity.HasOne(d => d.Sport).WithMany(p => p.Seats)
+                .HasForeignKey(d => d.SportId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Seat_Sport");
+
+            // TheaterId nullable FK
+            entity.HasOne(d => d.Theater).WithMany(p => p.Seats)
+                .HasForeignKey(d => d.TheaterId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Seat_Theater");
+
+            //entity.HasOne(d => d.Concert).WithMany(p => p.Seats)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK_Seat_Concert");
         });
 
         OnModelCreatingPartial(modelBuilder);

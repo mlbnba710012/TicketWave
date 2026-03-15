@@ -14,7 +14,9 @@ public partial class Seat
     [Key]
     public Guid SeatId { get; set; }
 
-    public Guid ConcertId { get; set; }
+    public Guid? ConcertId { get; set; }
+    public Guid? SportId { get; set; }
+    public Guid? TheaterId { get; set; }
 
     [Required]
     [StringLength(20)]
@@ -44,4 +46,12 @@ public partial class Seat
     [ForeignKey("ConcertId")]
     [InverseProperty("Seats")]
     public virtual Concert Concert { get; set; }
+
+    [ForeignKey("SportId")]
+    [InverseProperty("Seats")]
+    public virtual Sport Sport { get; set; }
+
+    [ForeignKey("TheaterId")]
+    [InverseProperty("Seats")]
+    public virtual Theater Theater { get; set; }
 }

@@ -1,0 +1,247 @@
+@{
+    ViewData["Title"] = "選擇張數";
+    var theater = ViewBag.Theater as TicketWave.Repository.Entity.Theater;
+    var zone = ViewBag.Zone as string;
+    var zoneInfo = ViewBag.ZoneInfo;
+    var remainingQuota = (int)ViewBag.RemainingQuota;
+    var maxQuantity = (int)ViewBag.MaxQuantity;
+}
+
+<section class="banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6"><h1 class="banner-header">選擇張數</h1></div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/Index">Home</a>
+                                <a href="/Theater/Index">Theater</a>
+                                <a href="#">Select Quantity</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 進度條 -->
+<section style="background-color: #f8f9fa; padding: 30px 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto;">
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background-color: #28a745; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 20px;">
+                            <i class="fa fa-check"></i>
+                        </div>
+                        <small style="margin-top: 5px; display: block;">選擇區域</small>
+                    </div>
+                    <div style="flex: 1; height: 3px; background-color: #007bff; margin: 0 10px;"></div>
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background-color: #007bff; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 20px; font-weight: bold;">2</div>
+                        <small style="margin-top: 5px; display: block;"><strong>選擇張數</strong></small>
+                    </div>
+                    <div style="flex: 1; height: 3px; background-color: #ddd; margin: 0 10px;"></div>
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background-color: #ddd; color: #666; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 20px;">3</div>
+                        <small style="margin-top: 5px; display: block;">選擇座位</small>
+                    </div>
+                    <div style="flex: 1; height: 3px; background-color: #ddd; margin: 0 10px;"></div>
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background-color: #ddd; color: #666; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 20px;">4</div>
+                        <small style="margin-top: 5px; display: block;">確認購買</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section style="padding: 50px 0;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg">
+                    <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <h4 class="mb-0"><i class="fa fa-ticket"></i> @theater.TheaterName</h4>
+                    </div>
+                    <div class="card-body" style="padding: 30px;">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <p><strong><i class="fa fa-calendar"></i> 演出時間：</strong><br />@theater.PerformanceDate.ToString("yyyy/MM/dd HH:mm")</p>
+                                <p><strong><i class="fa fa-map-marker-alt"></i> 場館：</strong><br />@theater.VenueName</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p>
+                                    <strong><i class="fa fa-layer-group"></i> 選擇區域：</strong>
+                                    <span class="badge badge-info" style="font-size: 18px; padding: 8px 15px;">@zone</span>
+                                </p>
+                                <p>
+                                    <strong><i class="fa fa-dollar-sign"></i> 票價：</strong>
+                                    <span style="color: #dc3545; font-size: 24px; font-weight: bold;">NT$ @zoneInfo.Price.ToString("N0")</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr style="border-top: 2px solid #ddd;" />
+
+                        <form asp-controller="Theater" asp-action="VerifyCaptcha" method="post" id="quantityForm">
+                            <input type="hidden" name="theaterId" value="@theater.TheaterId" />
+                            <input type="hidden" name="zone" value="@zone" />
+
+                            <div class="form-group">
+                                <label style="font-size: 18px; font-weight: bold;">
+                                    <i class="fa fa-ticket-alt"></i> 選擇票數：
+                                </label>
+                                <select name="quantity" id="quantity" class="form-control form-control-lg" required onchange="updateTotal()">
+                                    <option value="">請選擇張數</option>
+                                    @for (int i = 1; i <= maxQuantity; i++)
+                                    {
+                                        <option value="@i">@i 張</option>
+                                    }
+                                </select>
+                                <small class="text-muted">
+                                    <i class="fa fa-info-circle"></i> 您還可以購買 @remainingQuota 張（每場最多 4 張）
+                                </small>
+                            </div>
+
+                            <div class="alert alert-info mt-3" id="totalAmount" style="display: none; font-size: 18px;">
+                                <strong><i class="fa fa-calculator"></i> 總金額：NT$ <span id="totalPrice">0</span></strong>
+                            </div>
+
+                            <hr style="border-top: 2px solid #ddd;" />
+
+                            <div class="form-group">
+                                <label style="font-size: 18px; font-weight: bold;">
+                                    <i class="fa fa-shield-alt"></i> 請輸入驗證碼：
+                                </label>
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <img src="@Url.Action("GenerateCaptcha", "Theater")"
+                                             alt="驗證碼" id="captchaImage"
+                                             style="border: 2px solid #007bff; padding: 5px; border-radius: 5px; cursor: pointer; width: 100%;"
+                                             onclick="refreshCaptcha()" title="點擊重新整理" />
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="refreshCaptcha()">
+                                            <i class="fa fa-redo"></i> 重新整理驗證碼
+                                        </button>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <input type="text" name="captchaInput" class="form-control form-control-lg"
+                                               placeholder="請輸入驗證碼" maxlength="4"
+                                               style="font-size: 24px; text-align: center; letter-spacing: 5px;" required />
+                                        <small class="text-muted"><i class="fa fa-info-circle"></i> 驗證碼防止機器人掃票</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (TempData["ErrorMessage"] != null)
+                            {
+                                <div class="alert alert-danger mt-3">
+                                    <i class="fa fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                                </div>
+                            }
+
+                            <div class="form-group">
+                                <label style="font-size: 18px; font-weight: bold;">
+                                    <i class="fa fa-cog"></i> 選位方式：
+                                </label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card" style="cursor: pointer; border: 2px solid #007bff;" onclick="selectMode('manual')">
+                                            <div class="card-body text-center">
+                                                <input type="radio" name="seatMode" value="manual" id="manualMode" checked />
+                                                <label for="manualMode" style="cursor: pointer; margin-left: 10px;">
+                                                    <i class="fa fa-hand-pointer" style="font-size: 24px; color: #007bff;"></i>
+                                                    <h5 style="margin-top: 10px;">手動選位</h5>
+                                                    <p class="text-muted">自己挑選喜歡的座位</p>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card" style="cursor: pointer; border: 2px solid #ddd;" onclick="selectMode('auto')">
+                                            <div class="card-body text-center">
+                                                <input type="radio" name="seatMode" value="auto" id="autoMode" />
+                                                <label for="autoMode" style="cursor: pointer; margin-left: 10px;">
+                                                    <i class="fa fa-robot" style="font-size: 24px; color: #28a745;"></i>
+                                                    <h5 style="margin-top: 10px;">系統選位</h5>
+                                                    <p class="text-muted">系統自動選最佳座位</p>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="autoSelect" id="autoSelectInput" value="false" />
+                            </div>
+
+                            <div class="form-group mt-4" style="display: flex; justify-content: space-between;">
+                                <a href="@Url.Action("SelectZone", "Theater", new { theaterId = theater.TheaterId })"
+                                   class="btn btn-secondary btn-lg">
+                                    <i class="fa fa-arrow-left"></i> 返回選擇區域
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
+                                    <i class="fa fa-arrow-right"></i> <span id="submitBtnText">下一步：選擇座位</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function updateTotal() {
+        const quantity = parseInt(document.getElementById('quantity').value);
+        const price = @zoneInfo.Price;
+        if (quantity > 0) {
+            document.getElementById('totalPrice').textContent = (quantity * price).toLocaleString();
+            document.getElementById('totalAmount').style.display = 'block';
+            document.getElementById('submitBtn').disabled = false;
+        } else {
+            document.getElementById('totalAmount').style.display = 'none';
+            document.getElementById('submitBtn').disabled = true;
+        }
+    }
+    function selectMode(mode) {
+        const manualCard = document.querySelector('.card:has(#manualMode)');
+        const autoCard = document.querySelector('.card:has(#autoMode)');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const autoSelectInput = document.getElementById('autoSelectInput');
+        if (mode === 'manual') {
+            document.getElementById('manualMode').checked = true;
+            manualCard.style.border = '2px solid #007bff';
+            autoCard.style.border = '2px solid #ddd';
+            submitBtnText.textContent = '下一步：選擇座位';
+            autoSelectInput.value = 'false';
+        } else {
+            document.getElementById('autoMode').checked = true;
+            manualCard.style.border = '2px solid #ddd';
+            autoCard.style.border = '2px solid #28a745';
+            submitBtnText.innerHTML = '<i class="fa fa-magic"></i> 系統自動選位';
+            autoSelectInput.value = 'true';
+        }
+    }
+    function refreshCaptcha() {
+        document.getElementById('captchaImage').src = '@Url.Action("GenerateCaptcha", "Theater")?chars=4&t=' + new Date().getTime();
+    }
+    document.getElementById('quantityForm').addEventListener('submit', function(e) {
+        const quantity = document.getElementById('quantity').value;
+        const captcha = document.querySelector('input[name="captchaInput"]').value;
+        if (!quantity) { e.preventDefault(); alert('請選擇票數'); return false; }
+        if (!captcha || captcha.length !== 4) { e.preventDefault(); alert('請輸入 4 位數驗證碼'); return false; }
+    });
+</script>
+
+<style>
+    .card { border: none; }
+    .card-header { border-radius: 10px 10px 0 0 !important; }
+    .form-control-lg { border: 2px solid #ddd; transition: border-color 0.3s; }
+    .form-control-lg:focus { border-color: #007bff; box-shadow: 0 0 10px rgba(0,123,255,0.3); }
+    .btn-lg { padding: 12px 30px; font-size: 18px; }
+</style>

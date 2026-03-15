@@ -13,8 +13,8 @@
         </div>
     </div>
 
-    <!-- 統計卡片 -->
-    <div class="row g-3 mb-4">
+    <!-- 統計卡片：第一列 -->
+    <div class="row g-3 mb-3">
         <!-- 會員總數 -->
         <div class="col-xl-3 col-md-6">
             <div class="stat-card">
@@ -23,24 +23,7 @@
                         <h6 class="mb-1 opacity-75">會員總數</h6>
                         <h2 class="mb-0">@ViewBag.TotalMembers</h2>
                     </div>
-                    <div>
-                        <i class="fa fa-users fa-3x opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 演唱會總數 -->
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card success">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="mb-1 opacity-75">演唱會總數</h6>
-                        <h2 class="mb-0">@ViewBag.TotalConcerts</h2>
-                    </div>
-                    <div>
-                        <i class="fa fa-music fa-3x opacity-50"></i>
-                    </div>
+                    <div><i class="fa fa-users fa-3x opacity-50"></i></div>
                 </div>
             </div>
         </div>
@@ -53,9 +36,7 @@
                         <h6 class="mb-1 opacity-75">訂單總數</h6>
                         <h2 class="mb-0">@ViewBag.TotalOrders</h2>
                     </div>
-                    <div>
-                        <i class="fa fa-shopping-cart fa-3x opacity-50"></i>
-                    </div>
+                    <div><i class="fa fa-shopping-cart fa-3x opacity-50"></i></div>
                 </div>
             </div>
         </div>
@@ -68,46 +49,81 @@
                         <h6 class="mb-1 opacity-75">總營收</h6>
                         <h2 class="mb-0">$@ViewBag.TotalRevenue.ToString("N0")</h2>
                     </div>
+                    <div><i class="fa fa-dollar-sign fa-3x opacity-50"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 今日統計 -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <i class="fa fa-dollar-sign fa-3x opacity-50"></i>
+                        <h6 class="mb-1 opacity-75">今日訂單 / 今日營收</h6>
+                        <h2 class="mb-0">@ViewBag.TodayOrders 筆</h2>
+                        <small class="opacity-75">$@ViewBag.TodayRevenue.ToString("N0")</small>
                     </div>
+                    <div><i class="fa fa-calendar-day fa-3x opacity-50"></i></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 今日統計 -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
-                        <i class="fa fa-calendar-day me-2"></i> 今日統計
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p class="mb-2">
-                                <i class="fa fa-shopping-cart text-primary me-2"></i>
-                                <strong>今日訂單：</strong> @ViewBag.TodayOrders 筆
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-2">
-                                <i class="fa fa-dollar-sign text-success me-2"></i>
-                                <strong>今日營收：</strong> $@ViewBag.TodayRevenue.ToString("N0")
-                            </p>
-                        </div>
+    <!-- 統計卡片：第二列（活動場次）-->
+    <div class="row g-3 mb-4">
+        <!-- 演唱會場次 -->
+        <div class="col-xl-4 col-md-6">
+            <div class="stat-card success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 opacity-75">演唱會場次</h6>
+                        <h2 class="mb-0">@ViewBag.TotalConcerts</h2>
+                        <small class="opacity-75">
+                            <a href="/Concert/Index" class="text-white">前往管理 →</a>
+                        </small>
                     </div>
+                    <div><i class="fa fa-music fa-3x opacity-50"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 運動賽事場次 -->
+        <div class="col-xl-4 col-md-6">
+            <div class="stat-card" style="background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 opacity-75">運動賽事場次</h6>
+                        <h2 class="mb-0">@ViewBag.TotalSports</h2>
+                        <small class="opacity-75">
+                            <a href="/Sport/Index" class="text-white">前往管理 →</a>
+                        </small>
+                    </div>
+                    <div><i class="fa fa-trophy fa-3x opacity-50"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 表演藝術場次 -->
+        <div class="col-xl-4 col-md-6">
+            <div class="stat-card" style="background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 opacity-75">表演藝術場次</h6>
+                        <h2 class="mb-0">@ViewBag.TotalTheaters</h2>
+                        <small class="opacity-75">
+                            <a href="/Theater/Index" class="text-white">前往管理 →</a>
+                        </small>
+                    </div>
+                    <div><i class="fa fa-ticket fa-3x opacity-50"></i></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 最新訂單 -->
+    <!-- 最新訂單 + 熱門活動 -->
     <div class="row mb-4">
-        <div class="col-lg-8">
+        <!-- 最新訂單 -->
+        <div class="col-lg-7">
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">
@@ -115,7 +131,7 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    @if (ViewBag.RecentOrders != null && ((IEnumerable<dynamic>)ViewBag.RecentOrders).Any())
+                    @if (ViewBag.RecentOrders != null && ((IEnumerable<TicketWave.Repository.Entity.Order>)ViewBag.RecentOrders).Any())
                     {
                         <div class="table-responsive">
                             <table class="table table-hover">
@@ -123,17 +139,32 @@
                                     <tr>
                                         <th>訂單編號</th>
                                         <th>會員</th>
+                                        <th>活動類型</th>
                                         <th>金額</th>
                                         <th>狀態</th>
                                         <th>訂購時間</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var order in ViewBag.RecentOrders)
+                                    @foreach (var order in (IEnumerable<TicketWave.Repository.Entity.Order>)ViewBag.RecentOrders)
                                     {
                                         <tr>
-                                            <td><small>@order.OrderId.ToString().Substring(0, 8)</small></td>
+                                            <td><small>@order.OrderNumber</small></td>
                                             <td>@order.Member?.Name</td>
+                                            <td>
+                                                @if (order.ConcertId.HasValue)
+                                                {
+                                                    <span class="badge" style="background-color:#22c55e;">演唱會</span>
+                                                }
+                                                else if (order.SportId.HasValue)
+                                                {
+                                                    <span class="badge" style="background-color:#1a73e8;">運動賽事</span>
+                                                }
+                                                else if (order.TheaterId.HasValue)
+                                                {
+                                                    <span class="badge" style="background-color:#764ba2;">表演藝術</span>
+                                                }
+                                            </td>
                                             <td>$@order.TotalAmount.ToString("N0")</td>
                                             <td>
                                                 @if (order.OrderStatus == 0)
@@ -164,46 +195,113 @@
             </div>
         </div>
 
-        <!-- 熱門演唱會 -->
-        <div class="col-lg-4">
-            <div class="card">
+        <!-- 右側：三種熱門活動 -->
+        <div class="col-lg-5">
+
+            <!-- 熱門演唱會 -->
+            <div class="card mb-3">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">
-                        <i class="fa fa-fire me-2"></i> 熱門演唱會（前 5 名）
+                        <i class="fa fa-music me-2 text-success"></i> 熱門演唱會
                     </h5>
                 </div>
-                <div class="card-body">
-                    @if (ViewBag.PopularConcerts != null && ((IEnumerable<dynamic>)ViewBag.PopularConcerts).Any())
+                <div class="card-body py-2">
+                    @if (ViewBag.PopularConcerts != null && ((IEnumerable<TicketWave.Repository.Entity.Concert>)ViewBag.PopularConcerts).Any())
                     {
                         <div class="list-group list-group-flush">
-                            @foreach (var concert in ViewBag.PopularConcerts)
+                            @foreach (var concert in (IEnumerable<TicketWave.Repository.Entity.Concert>)ViewBag.PopularConcerts)
                             {
                                 var soldSeats = concert.TotalSeats - concert.AvailableSeats;
-                                var soldPercentage = concert.TotalSeats > 0 ? (soldSeats * 100.0 / concert.TotalSeats) : 0;
-
-                                <div class="list-group-item px-0">
-                                    <h6 class="mb-1">@concert.ConcertName</h6>
-                                    <small class="text-muted d-block mb-2">@concert.ArtistName</small>
-                                    <div class="progress" style="height: 5px;">
-                                        <div class="progress-bar"
-                                             role="progressbar"
-                                             style="width: @soldPercentage.ToString("F1")%"
-                                             aria-valuenow="@soldPercentage"
-                                             aria-valuemin="0"
-                                             aria-valuemax="100">
-                                        </div>
+                                var soldPct = concert.TotalSeats > 0 ? (soldSeats * 100.0 / concert.TotalSeats) : 0;
+                                <div class="list-group-item px-0 py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold small">@concert.ConcertName</span>
+                                        <small class="text-muted">@soldPct.ToString("F0")%</small>
                                     </div>
-                                    <small class="text-muted">已售 @soldPercentage.ToString("F1")%</small>
+                                    <div class="progress mt-1" style="height: 4px;">
+                                        <div class="progress-bar bg-success" style="width: @soldPct.ToString("F1")%"></div>
+                                    </div>
                                 </div>
                             }
                         </div>
                     }
                     else
                     {
-                        <p class="text-muted text-center mb-0">目前沒有演唱會</p>
+                        <p class="text-muted text-center mb-0 small">目前沒有演唱會</p>
                     }
                 </div>
             </div>
+
+            <!-- 熱門運動賽事 -->
+            <div class="card mb-3">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fa fa-trophy me-2" style="color:#1a73e8;"></i> 熱門運動賽事
+                    </h5>
+                </div>
+                <div class="card-body py-2">
+                    @if (ViewBag.PopularSports != null && ((IEnumerable<TicketWave.Repository.Entity.Sport>)ViewBag.PopularSports).Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var sport in (IEnumerable<TicketWave.Repository.Entity.Sport>)ViewBag.PopularSports)
+                            {
+                                var soldSeats = sport.TotalSeats - sport.AvailableSeats;
+                                var soldPct = sport.TotalSeats > 0 ? (soldSeats * 100.0 / sport.TotalSeats) : 0;
+                                <div class="list-group-item px-0 py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold small">@sport.SportName</span>
+                                        <small class="text-muted">@soldPct.ToString("F0")%</small>
+                                    </div>
+                                    <small class="text-muted">@sport.HomeTeam vs @sport.AwayTeam</small>
+                                    <div class="progress mt-1" style="height: 4px;">
+                                        <div class="progress-bar" style="width: @soldPct.ToString("F1")%; background-color:#1a73e8;"></div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0 small">目前沒有運動賽事</p>
+                    }
+                </div>
+            </div>
+
+            <!-- 熱門表演藝術 -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fa fa-ticket me-2" style="color:#764ba2;"></i> 熱門表演藝術
+                    </h5>
+                </div>
+                <div class="card-body py-2">
+                    @if (ViewBag.PopularTheaters != null && ((IEnumerable<TicketWave.Repository.Entity.Theater>)ViewBag.PopularTheaters).Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var theater in (IEnumerable<TicketWave.Repository.Entity.Theater>)ViewBag.PopularTheaters)
+                            {
+                                var soldSeats = theater.TotalSeats - theater.AvailableSeats;
+                                var soldPct = theater.TotalSeats > 0 ? (soldSeats * 100.0 / theater.TotalSeats) : 0;
+                                <div class="list-group-item px-0 py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold small">@theater.TheaterName</span>
+                                        <small class="text-muted">@soldPct.ToString("F0")%</small>
+                                    </div>
+                                    <small class="text-muted">@theater.TheaterType</small>
+                                    <div class="progress mt-1" style="height: 4px;">
+                                        <div class="progress-bar" style="width: @soldPct.ToString("F1")%; background-color:#764ba2;"></div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0 small">目前沒有表演藝術</p>
+                    }
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

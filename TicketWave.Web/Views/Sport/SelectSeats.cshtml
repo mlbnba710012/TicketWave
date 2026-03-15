@@ -1,0 +1,341 @@
+@model List<TicketWave.Repository.Entity.Seat>
+@{
+    ViewData["Title"] = "選擇座位";
+    // 改為 Sport
+    var sport = ViewBag.Sport as TicketWave.Repository.Entity.Sport;
+
+    var currentTicketCount = ViewBag.CurrentTicketCount != null
+        ? (int)ViewBag.CurrentTicketCount
+        : 0;
+
+    var remainingQuota = ViewBag.RemainingQuota != null
+        ? (int)ViewBag.RemainingQuota
+        : 4;
+
+    var memberSeatIds = ViewBag.MemberSeatIds as List<Guid> ?? new List<Guid>();
+}
+
+<!-- Banner -->
+<section class="concert">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1 class="banner-header">選擇座位</h1>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/Index">Home</a>
+                                <a href="/Sport/Index">Sports</a>
+                                <a href="#">Select Seats</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 賽事資訊 -->
+<section id="concert-info" style="background-color: #f8f9fa; padding: 30px 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header" style="background-color: #1a73e8; color: white;">
+                        <!-- 改為 sport.SportName -->
+                        <h3><i class="fa fa-futbol-o"></i> @sport.SportName</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>主場：</strong>@sport.HomeTeam vs @sport.AwayTeam</p>
+                                <p><strong>比賽時間：</strong>@sport.PerformanceDate.ToString("yyyy/MM/dd HH:mm")</p>
+                                <p><strong>場館：</strong>@sport.VenueName</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>剩餘座位：</strong>@sport.AvailableSeats / @sport.TotalSeats</p>
+                                <p><strong>您已購買：</strong>@currentTicketCount 張</p>
+                                <p><strong>還可購買：</strong><span style="color: #dc3545; font-weight: bold;">@remainingQuota 張</span>（每場最多 4 張）</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 座位圖 -->
+<section id="ticket">
+    <div class="container">
+        <header class="section-header">
+            <h3>座位圖</h3>
+            <p style="color: #6c757d;">點擊座位進行選擇（最多選擇 @remainingQuota 個）</p>
+        </header>
+
+        <!-- 座位圖例 -->
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="col-md-12">
+                <div style="display: flex; gap: 20px; justify-content: center; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="width: 30px; height: 30px; background-color: #d4edda; border: 2px solid #28a745; display: inline-block; border-radius: 3px;"></span>
+                        可選擇
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="width: 30px; height: 30px; background-color: #6c757d; display: inline-block; border-radius: 3px;"></span>
+                        已售出
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="width: 30px; height: 30px; background-color: #dc3545; border: 2px solid #a71d2a; display: inline-block; border-radius: 3px;"></span>
+                        <strong>您已購買</strong>
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="width: 30px; height: 30px; background-color: #ffc107; display: inline-block; border-radius: 3px;"></span>
+                        已選擇
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 場地標示（替代舞台） -->
+        <div class="row" style="margin-bottom: 40px;">
+            <div class="col-md-12">
+                <div style="text-align: center; margin: 30px auto; max-width: 600px;">
+                    <div style="background-color: #1a73e8; color: white; padding: 20px; border-radius: 5px;">
+                        🏟️ 場地 FIELD
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 座位區域 -->
+        @{
+            // var seatsByZone = Model.GroupBy(s => s.SeatZone).OrderBy(g => g.Key);
+            var seatsByZone = Model.GroupBy(s => s.SeatZone)
+            .OrderBy(g => int.TryParse(g.Key, out int z) ? z : 999)
+            .ThenBy(g => g.Key);
+        }
+
+        @foreach (var zone in seatsByZone)
+        {
+            <div class="row" style="margin-bottom: 40px;">
+                <div class="col-md-12">
+                    <div class="single-ticket" style="padding: 30px;">
+                        <h4 style="color: #1a73e8; margin-bottom: 20px;">
+                            <i class="fa fa-map-marker-alt"></i> @zone.Key
+                            <small style="color: #6c757d; font-size: 16px;">(NT$ @zone.First().Price)</small>
+                        </h4>
+
+                        @{
+                            // var seatsByRow = zone.GroupBy(s => s.SeatRow).OrderBy(g => g.Key);
+                            var seatsByRow = zone.GroupBy(s => s.SeatRow)
+                            .OrderBy(g => int.TryParse(g.Key, out int r) ? r : 999)
+                            .ThenBy(g => g.Key);
+                        }
+
+                        @foreach (var row in seatsByRow)
+                        {
+                            <div class="seat-row" style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <span class="row-label" style="min-width: 70px; font-weight: bold; color: #495057;">
+                                    @(int.TryParse(row.Key, out int rowNum) ? rowNum.ToString("D2") : row.Key) 排
+                                </span>
+                                @* <span class="row-label" style="min-width: 70px; font-weight: bold; color: #495057;">@row.Key 排</span> *@
+                                <div class="seats-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    @* @foreach (var seat in row.OrderBy(s => s.SeatNumber)) *@
+                                        @foreach (var seat in row.OrderBy(s => int.TryParse(s.SeatNumber, out int n) ? n : 999))
+                                    {
+                                        var isMySeat = memberSeatIds.Contains(seat.SeatId);
+                                        var statusClass = isMySeat ? "my-seat" : (seat.SeatStatus == 0 ? "available" : "sold");
+
+                                        <button type="button"
+                                                class="seat-btn @statusClass"
+                                                data-seat-id="@seat.SeatId"
+                                                data-zone="@seat.SeatZone"
+                                                data-row="@seat.SeatRow"
+                                                @* data-number="@seat.SeatNumber" *@
+                                                data-number = @(int.TryParse(seat.SeatNumber, out int seatNum) ? seatNum.ToString("D2") : seat.SeatNumber)
+                                                data-price="@seat.Price"
+                                                data-status="@seat.SeatStatus"
+                                                @(seat.SeatStatus != 0 ? "disabled" : "")
+                                                title="@seat.SeatZone @seat.SeatRow 排 @seat.SeatNumber 號 - NT$ @seat.Price">
+                                            @seat.SeatNumber
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@if (remainingQuota == 0)
+{
+    <section style="padding: 30px 0;">
+        <div class="container">
+            <div class="alert alert-warning" role="alert">
+                <i class="fa fa-exclamation-triangle"></i>
+                您已達到此場運動賽事的購票上限（4 張）。
+            </div>
+        </div>
+    </section>
+}
+else
+{
+    <section id="cart">
+        <div class="container">
+            <header class="section-header">
+                <h3>已選座位</h3>
+            </header>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="selected-seats-display" style="min-height: 60px; padding: 20px; background-color: #f8f9fa; border-radius: 5px; margin-bottom: 20px;">
+                        <span style="color: #6c757d;">尚未選擇座位</span>
+                    </div>
+                    <div class="row" style="margin-bottom: 20px;">
+                        <div class="col-md-6">
+                            <p><strong>已選數量：</strong><span id="selected-count" style="font-size: 24px; color: #007bff;">0</span> 張</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>總金額：</strong>NT$ <span id="total-amount" style="font-size: 24px; color: #28a745;">0</span></p>
+                        </div>
+                    </div>
+                    <button id="confirm-btn" type="submit" disabled style="width: 100%; padding: 15px; font-size: 18px;">
+                        <i class="fa fa-check"></i> 確認購買
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@section MyCSS {
+    <style>
+        .seat-btn { width: 50px; height: 50px; border: 2px solid #28a745; background-color: #d4edda; color: #155724; border-radius: 5px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .seat-btn:hover:not(:disabled) { transform: scale(1.1); box-shadow: 0 0 15px rgba(40, 167, 69, 0.5); }
+        .seat-btn.sold { background-color: #6c757d; border-color: #6c757d; color: white; cursor: not-allowed; opacity: 0.5; }
+        .seat-btn.my-seat { background-color: #dc3545; border: 2px solid #a71d2a; color: white; cursor: not-allowed; opacity: 1; font-weight: bold; }
+        .seat-btn.my-seat:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(220, 53, 69, 0.6); }
+        .seat-btn.selected { background-color: #ffc107; border-color: #ffc107; color: #000; transform: scale(1.1); }
+        .selected-seat-tag { display: inline-block; background-color: #ffc107; color: #000; padding: 8px 15px; margin: 5px; border-radius: 5px; font-size: 14px; font-weight: bold; }
+        #confirm-btn { background: linear-gradient(to right, #1a73e8, #0d47a1); border: none; color: white; border-radius: 5px; transition: all 0.3s; }
+        #confirm-btn:hover:not(:disabled) { background: linear-gradient(to right, #0d47a1, #083a87); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(26, 115, 232, 0.3); }
+        #confirm-btn:disabled { background: #6c757d; cursor: not-allowed; opacity: 0.6; }
+        .single-ticket { border: 1px solid #dee2e6; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card { box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: none; }
+    </style>
+}
+
+@section MyJS {
+    <script>
+        $(document).ready(function() {
+            const maxSeats = @remainingQuota;
+            // 改為 sportId
+            const sportId = '@sport.SportId';
+            let selectedSeats = [];
+
+            $('.seat-btn.available').click(function() {
+                const seatId = $(this).data('seat-id');
+                const zone = $(this).data('zone');
+                const row = $(this).data('row');
+                const number = $(this).data('number');
+                const price = parseFloat($(this).data('price'));
+
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                    selectedSeats = selectedSeats.filter(s => s.seatId !== seatId);
+                } else {
+                    if (selectedSeats.length >= maxSeats) {
+                        alert(`最多只能選擇 ${maxSeats} 個座位`);
+                        return;
+                    }
+                    $(this).addClass('selected');
+                    selectedSeats.push({ seatId, zone, row, number, price });
+                }
+
+                updateDisplay();
+            });
+
+            function updateDisplay() {
+                const count = selectedSeats.length;
+                const total = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
+
+                $('#selected-count').text(count);
+                $('#total-amount').text(total.toFixed(0));
+
+                if (count === 0) {
+                    $('#selected-seats-display').html('<span style="color: #6c757d;">尚未選擇座位</span>');
+                    $('#confirm-btn').prop('disabled', true);
+                } else {
+                    const seatsHtml = selectedSeats.map(seat =>
+                        `<span class="selected-seat-tag">${seat.zone} ${seat.row}排 ${seat.number}號</span>`
+                    ).join('');
+                    $('#selected-seats-display').html(seatsHtml);
+                    $('#confirm-btn').prop('disabled', false);
+                }
+            }
+
+            $('#confirm-btn').click(function() {
+                if (selectedSeats.length === 0) {
+                    alert('請選擇座位');
+                    return;
+                }
+
+                const totalAmount = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+                const seatsList = selectedSeats.map(s => `${s.zone} ${s.row}排 ${s.number}號`).join('\n');
+
+                if (!confirm(`確定要購買 ${selectedSeats.length} 張票嗎？\n\n座位：\n${seatsList}\n\n總金額：NT$ ${totalAmount}`)) {
+                    return;
+                }
+
+                const seatIds = selectedSeats.map(s => s.seatId);
+
+                $.ajax({
+                    // 改為 Sport/CreateOrder
+                    url: '@Url.Action("CreateOrder", "Sport")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        sportId: sportId,
+                        selectedSeats: seatIds
+                    }),
+                    success: function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            window.location.href = '/Member/Orders';
+                        } else {
+                            alert(response.message);
+                            if (response.message.includes('已被購買')) {
+                                location.reload();
+                            }
+                        }
+                    },
+                    error: function() {
+                        alert('訂單建立失敗，請稍後再試');
+                    }
+                });
+            });
+
+            // 每30秒檢查座位狀態
+            setInterval(function() {
+                // 改為 Sport/CheckSeatStatus 並帶 sportId
+                $.get('@Url.Action("CheckSeatStatus", "Sport")?sportId=' + sportId, function(seats) {
+                    seats.forEach(function(seat) {
+                        const $btn = $(`.seat-btn[data-seat-id="${seat.seatId}"]`);
+                        if (seat.status === 1 && !$btn.hasClass('sold') && !$btn.hasClass('my-seat')) {
+                            $btn.removeClass('available selected').addClass('sold').prop('disabled', true);
+                            selectedSeats = selectedSeats.filter(s => s.seatId !== seat.seatId);
+                            updateDisplay();
+                        }
+                    });
+                });
+            }, 30000);
+        });
+    </script>
+}

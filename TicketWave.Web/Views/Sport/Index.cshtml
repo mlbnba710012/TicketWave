@@ -1,0 +1,130 @@
+﻿@model List<TicketWave.Repository.Entity.Sport>
+@{
+    ViewData["Title"] = "Sports";
+}
+
+<!-- Banner Section Start-->
+<section class="banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1 class="banner-header">
+                            Sports
+                        </h1>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="banner-nav">
+                            <span class="banner-box">
+                                <a href="/Home/index">Home</a>
+                                <a href="/Sport/Index">Sports</a>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Banner Section end -->
+<!-- About Section Start-->
+<section id="about">
+    <div class="container">
+        <header class="section-header">
+            <h3>Sports</h3>
+        </header>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info text-center">
+                <h4>目前沒有運動賽事資訊</h4>
+                <p>請稍後再回來查看</p>
+            </div>
+        }
+        else
+        {
+            @* 第一場賽事（大圖） *@
+            @if (Model.Count > 0)
+            {
+                var firstSport = Model[0];
+                <div class="row">
+                    <div class="col-md-4 about-col-1">
+                        <div class="about-title">
+                            <h1>
+                                Welcome to @firstSport.SportName
+                            </h1>
+                            <a asp-controller="Sport"
+                               asp-action="SelectSeats"
+                               asp-route-sportId="@firstSport.SportId">
+                                Buy Tickets
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-8 about-col-2">
+                        <div class="about-imgs">
+                            <div class="about-img">
+                                @if (!string.IsNullOrEmpty(firstSport.PosterImageUrl))
+                                {
+                                    <img class="img-fluid" src="@firstSport.PosterImageUrl" alt="@firstSport.SportName" />
+                                }
+                                else
+                                {
+                                    <img class="img-fluid" src="~/img/sport-1.png" alt="@firstSport.SportName" />
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    @* 其他賽事（兩欄） *@
+                    <div class="col-md-12 about-des">
+                        <div class="row">
+                            @for (int i = 1; i < Model.Count && i < 3; i++)
+                            {
+                                var sport = Model[i];
+                                var imagePath = $"~/img/sport-{i + 1}.png";
+
+                                <div class="col-md-6">
+                                    <div class="about-des-col">
+                                        <div class="about-img">
+                                            @if (!string.IsNullOrEmpty(sport.PosterImageUrl))
+                                            {
+                                                <img class="img-fluid" src="@sport.PosterImageUrl" alt="@sport.SportName" />
+                                            }
+                                            else
+                                            {
+                                                <img class="img-fluid" src="@imagePath" alt="@sport.SportName" />
+                                            }
+                                        </div>
+                                        <p>
+                                            <strong>@sport.SportName</strong>
+                                            <br />
+                                            @if (!string.IsNullOrEmpty(sport.Description))
+                                            {
+                                                @sport.Description
+                                                <br />
+                                            }
+                                            <i class="fa fa-futbol-o"></i> 類型：@sport.SportType
+                                            <br />
+                                            <i class="fa fa-shield"></i> 主場：@sport.HomeTeam vs @sport.AwayTeam
+                                            <br />
+                                            <i class="fa fa-calendar"></i> 時間：@sport.PerformanceDate.ToString("yyyy/MM/dd HH:mm")
+                                            <br />
+                                            <i class="fa fa-map-marker-alt"></i> 地點：@sport.VenueName
+                                        </p>
+                                        <a asp-controller="Sport"
+                                           asp-action="SelectSeats"
+                                           asp-route-sportId="@sport.SportId">
+                                            Buy Tickets
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>
+<!-- About Section end -->

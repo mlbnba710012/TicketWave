@@ -11,7 +11,7 @@ namespace TicketWave.Service.Services.Implement
     public class OrderService : IOrderService
     {
         private readonly TicketWaveContext _dbContext;
-        private const int MAX_TICKETS_PER_CONCERT = 4; // 每場演唱會最多 4 張票
+        private const int MAX_TICKETS_PER_EVENT = 4; // 每場活動最多 4 張票
 
         public OrderService(TicketWaveContext dbContext)
         {
@@ -42,82 +42,196 @@ namespace TicketWave.Service.Services.Implement
         }
 
         /// <summary>
-        /// 檢查會員在特定演唱會已購買的票數
+        /// 檢查會員在特定活動已購買的票數
         /// </summary>
-        public async Task<int> GetMemberTicketCountForConcert(Guid memberId, Guid concertId)
+        public async Task<int> GetMemberTicketCountForEvent(Guid memberId, Guid eventId, string eventType)
         {
-            // 計算該會員在該場演唱會已購買且未取消的票數
-            var ticketCount = await _dbContext.Orders
-                .Where(o => o.MemberId == memberId
-                         && o.ConcertId == concertId
-                         && o.OrderStatus != 2) // 排除已取消的訂單
-                .SumAsync(o => o.TicketCount);
+            var query = _dbContext.Orders
+                .Where(o => o.MemberId == memberId && o.OrderStatus != 2); // 排除已取消
+
+            var ticketCount = eventType.ToLower() switch
+            {
+                "concert" => await query.Where(o => o.ConcertId == eventId).SumAsync(o => o.TicketCount),
+                "sport" => await query.Where(o => o.SportId == eventId).SumAsync(o => o.TicketCount),
+                "theater" => await query.Where(o => o.TheaterId == eventId).SumAsync(o => o.TicketCount),
+                _ => throw new ArgumentException($"不支援的活動類型：{eventType}")
+            };
 
             return ticketCount;
         }
 
         /// <summary>
-        /// 驗證購票限制（每場演唱會最多 4 張）
+        /// 驗證購票限制（每場活動最多 4 張）
         /// </summary>
         public async Task<(bool CanPurchase, string Message, int CurrentCount)> ValidatePurchaseLimit(
-            Guid memberId, Guid concertId, int requestTicketCount)
+            Guid memberId, Guid eventId, string eventType, int requestTicketCount)
         {
-            // 查詢已購買的票數
-            var currentCount = await GetMemberTicketCountForConcert(memberId, concertId);
+            if (requestTicketCount < 1)
+                return (false, "至少需要選擇 1 個座位", 0);
 
-            // 計算購買後的總票數
+            if (requestTicketCount > MAX_TICKETS_PER_EVENT)
+                return (false, $"單次最多只能選擇 {MAX_TICKETS_PER_EVENT} 個座位", 0);
+
+            var currentCount = await GetMemberTicketCountForEvent(memberId, eventId, eventType);
             var totalAfterPurchase = currentCount + requestTicketCount;
 
-            if (totalAfterPurchase > MAX_TICKETS_PER_CONCERT)
+            if (totalAfterPurchase > MAX_TICKETS_PER_EVENT)
             {
-                var remainingQuota = MAX_TICKETS_PER_CONCERT - currentCount;
+                var remainingQuota = MAX_TICKETS_PER_EVENT - currentCount;
                 return (false,
-                    $"每場演唱會最多只能購買 {MAX_TICKETS_PER_CONCERT} 張票。您已購買 {currentCount} 張，還可購買 {remainingQuota} 張。",
+                    $"每場活動最多只能購買 {MAX_TICKETS_PER_EVENT} 張票。您已購買 {currentCount} 張，還可購買 {remainingQuota} 張。",
                     currentCount);
-            }
-
-            if (requestTicketCount < 1)
-            {
-                return (false, "至少需要選擇 1 個座位", currentCount);
-            }
-
-            if (requestTicketCount > 4)
-            {
-                return (false, "單次最多只能選擇 4 個座位", currentCount);
             }
 
             return (true, "可以購買", currentCount);
         }
 
         /// <summary>
-        /// 建立訂單
+        /// 建立演唱會訂單
         /// </summary>
-        public async Task<(bool Success, string Message, Guid? OrderId)> CreateOrder(
+        public async Task<(bool Success, string Message, Guid? OrderId)> CreateConcertOrder(
             Guid memberId, Guid concertId, List<Guid> seatIds)
+        {
+            var concert = await _dbContext.Concerts.FindAsync(concertId);
+            if (concert == null)
+                return (false, "演唱會不存在", null);
+            if (concert.Status != 1)
+                return (false, "此演唱會目前未開放售票", null);
+
+            return await CreateOrderInternal(
+                memberId: memberId,
+                eventName: concert.ConcertName,
+                seatIds: seatIds,
+                eventType: "concert",
+                eventId: concertId,
+                updateAvailableSeats: (count) =>
+                {
+                    concert.AvailableSeats -= count;
+                    concert.UpdateDate = DateTime.Now;
+                },
+                buildOrder: (orderId, orderNumber, now, totalAmount) => new Order
+                {
+                    OrderId = orderId,
+                    OrderNumber = orderNumber,
+                    MemberId = memberId,
+                    ConcertId = concertId,
+                    EventName = concert.ConcertName,
+                    TotalAmount = totalAmount,
+                    TicketCount = seatIds.Count,
+                    OrderStatus = 0,
+                    CreateDate = now,
+                    UpdateDate = now
+                }
+            );
+        }
+
+        /// <summary>
+        /// 建立運動賽事訂單
+        /// </summary>
+        public async Task<(bool Success, string Message, Guid? OrderId)> CreateSportOrder(
+            Guid memberId, Guid sportId, List<Guid> seatIds)
+        {
+            var sport = await _dbContext.Sports.FindAsync(sportId);
+            if (sport == null)
+                return (false, "運動賽事不存在", null);
+            if (sport.Status != 1)
+                return (false, "此運動賽事目前未開放售票", null);
+
+            return await CreateOrderInternal(
+                memberId: memberId,
+                eventName: sport.SportName,
+                seatIds: seatIds,
+                eventType: "sport",
+                eventId: sportId,
+                updateAvailableSeats: (count) =>
+                {
+                    sport.AvailableSeats -= count;
+                    sport.UpdateDate = DateTime.Now;
+                },
+                buildOrder: (orderId, orderNumber, now, totalAmount) => new Order
+                {
+                    OrderId = orderId,
+                    OrderNumber = orderNumber,
+                    MemberId = memberId,
+                    SportId = sportId,
+                    EventName = sport.SportName,
+                    TotalAmount = totalAmount,
+                    TicketCount = seatIds.Count,
+                    OrderStatus = 0,
+                    CreateDate = now,
+                    UpdateDate = now
+                }
+            );
+        }
+
+        /// <summary>
+        /// 建立表演藝術訂單
+        /// </summary>
+        public async Task<(bool Success, string Message, Guid? OrderId)> CreateTheaterOrder(
+            Guid memberId, Guid theaterId, List<Guid> seatIds)
+        {
+            var theater = await _dbContext.Theaters.FindAsync(theaterId);
+            if (theater == null)
+                return (false, "表演藝術活動不存在", null);
+            if (theater.Status != 1)
+                return (false, "此表演藝術活動目前未開放售票", null);
+
+            return await CreateOrderInternal(
+                memberId: memberId,
+                eventName: theater.TheaterName,
+                seatIds: seatIds,
+                eventType: "theater",
+                eventId: theaterId,
+                updateAvailableSeats: (count) =>
+                {
+                    theater.AvailableSeats -= count;
+                    theater.UpdateDate = DateTime.Now;
+                },
+                buildOrder: (orderId, orderNumber, now, totalAmount) => new Order
+                {
+                    OrderId = orderId,
+                    OrderNumber = orderNumber,
+                    MemberId = memberId,
+                    TheaterId = theaterId,
+                    EventName = theater.TheaterName,
+                    TotalAmount = totalAmount,
+                    TicketCount = seatIds.Count,
+                    OrderStatus = 0,
+                    CreateDate = now,
+                    UpdateDate = now
+                }
+            );
+        }
+
+        /// <summary>
+        /// 建立訂單的共用內部邏輯
+        /// </summary>
+        private async Task<(bool Success, string Message, Guid? OrderId)> CreateOrderInternal(
+            Guid memberId,
+            string eventName,
+            List<Guid> seatIds,
+            string eventType,
+            Guid eventId,
+            Action<int> updateAvailableSeats,
+            Func<Guid, string, DateTime, decimal, Order> buildOrder)
         {
             using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
             try
             {
                 // 1. 驗證購票限制
-                var validation = await ValidatePurchaseLimit(memberId, concertId, seatIds.Count);
+                var validation = await ValidatePurchaseLimit(memberId, eventId, eventType, seatIds.Count);
                 if (!validation.CanPurchase)
-                {
                     return (false, validation.Message, null);
-                }
 
-                // 2. 查詢座位資訊並鎖定
+                // 2. 查詢座位並確認狀態
                 var seats = await _dbContext.Seats
-                    .Where(s => seatIds.Contains(s.SeatId) && s.ConcertId == concertId)
+                    .Where(s => seatIds.Contains(s.SeatId))
                     .ToListAsync();
 
-                // 驗證座位數量
                 if (seats.Count != seatIds.Count)
-                {
                     return (false, "部分座位不存在", null);
-                }
 
-                // 檢查座位是否都可購買
                 var unavailableSeats = seats.Where(s => s.SeatStatus != 0).ToList();
                 if (unavailableSeats.Any())
                 {
@@ -125,40 +239,16 @@ namespace TicketWave.Service.Services.Implement
                     return (false, $"以下座位已被購買或鎖定：{seatInfo}", null);
                 }
 
-                // 3. 查詢演唱會資訊
-                var concert = await _dbContext.Concerts.FindAsync(concertId);
-                if (concert == null)
-                {
-                    return (false, "演唱會不存在", null);
-                }
-
-                if (concert.Status != 1)
-                {
-                    return (false, "此演唱會目前未開放售票", null);
-                }
-
-                // 4. 建立訂單
+                // 3. 建立訂單
                 var orderId = Guid.NewGuid();
                 var now = DateTime.Now;
                 var orderNumber = GenerateOrderNumber();
+                var totalAmount = seats.Sum(s => s.Price);
 
-                var order = new Order
-                {
-                    OrderId = orderId,
-                    OrderNumber = orderNumber,
-                    MemberId = memberId,
-                    ConcertId = concertId,
-                    ConcertName = concert.ConcertName,
-                    TotalAmount = seats.Sum(s => s.Price),
-                    TicketCount = seats.Count,
-                    OrderStatus = 0, // 待付款
-                    CreateDate = now,
-                    UpdateDate = now
-                };
-
+                var order = buildOrder(orderId, orderNumber, now, totalAmount);
                 _dbContext.Orders.Add(order);
 
-                // 5. 建立訂單明細
+                // 4. 建立訂單明細並更新座位狀態
                 foreach (var seat in seats)
                 {
                     var orderDetail = new OrderDetail
@@ -169,23 +259,20 @@ namespace TicketWave.Service.Services.Implement
                         SeatRow = seat.SeatRow,
                         SeatNumber = seat.SeatNumber,
                         Price = seat.Price,
-                        TicketStatus = 0, // 未使用
+                        TicketStatus = 0,
                         CreateDate = now
                     };
 
                     _dbContext.OrderDetails.Add(orderDetail);
 
-                    // 6. 更新座位狀態為已售出
                     seat.SeatStatus = 1; // 已售出
                     seat.OrderDetailId = orderDetail.OrderDetailId;
                     seat.UpdateDate = now;
                 }
 
-                // 7. 更新演唱會剩餘座位數
-                concert.AvailableSeats -= seats.Count;
-                concert.UpdateDate = now;
+                // 5. 更新活動剩餘座位數
+                updateAvailableSeats(seats.Count);
 
-                // 8. 儲存變更
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
@@ -211,29 +298,18 @@ namespace TicketWave.Service.Services.Implement
                     .Include(o => o.OrderDetails)
                     .FirstOrDefaultAsync(o => o.OrderId == orderId && o.MemberId == memberId);
 
-                if (order == null)
-                {
+                if (order == null || order.OrderStatus != 0)
                     return false;
-                }
 
-                // 只能取消待付款的訂單
-                if (order.OrderStatus != 0)
-                {
-                    return false;
-                }
-
-                // 更新訂單狀態
-                order.OrderStatus = 2; // 已取消
+                // 更新訂單狀態為已取消
+                order.OrderStatus = 2;
                 order.UpdateDate = DateTime.Now;
 
-                // 釋放座位
+                // 用 OrderDetailId 直接找座位並釋放（支援三種活動）
                 foreach (var detail in order.OrderDetails)
                 {
                     var seat = await _dbContext.Seats
-                        .FirstOrDefaultAsync(s => s.ConcertId == order.ConcertId
-                                                && s.SeatZone == detail.SeatZone
-                                                && s.SeatRow == detail.SeatRow
-                                                && s.SeatNumber == detail.SeatNumber);
+                        .FirstOrDefaultAsync(s => s.OrderDetailId == detail.OrderDetailId);
 
                     if (seat != null)
                     {
@@ -243,12 +319,21 @@ namespace TicketWave.Service.Services.Implement
                     }
                 }
 
-                // 更新演唱會剩餘座位數
-                var concert = await _dbContext.Concerts.FindAsync(order.ConcertId);
-                if (concert != null)
+                // 更新對應活動的剩餘座位數
+                if (order.ConcertId.HasValue)
                 {
-                    concert.AvailableSeats += order.TicketCount;
-                    concert.UpdateDate = DateTime.Now;
+                    var concert = await _dbContext.Concerts.FindAsync(order.ConcertId);
+                    if (concert != null) { concert.AvailableSeats += order.TicketCount; concert.UpdateDate = DateTime.Now; }
+                }
+                else if (order.SportId.HasValue)
+                {
+                    var sport = await _dbContext.Sports.FindAsync(order.SportId);
+                    if (sport != null) { sport.AvailableSeats += order.TicketCount; sport.UpdateDate = DateTime.Now; }
+                }
+                else if (order.TheaterId.HasValue)
+                {
+                    var theater = await _dbContext.Theaters.FindAsync(order.TheaterId);
+                    if (theater != null) { theater.AvailableSeats += order.TicketCount; theater.UpdateDate = DateTime.Now; }
                 }
 
                 await _dbContext.SaveChangesAsync();
@@ -264,13 +349,13 @@ namespace TicketWave.Service.Services.Implement
         }
 
         /// <summary>
-        /// 生成訂單編號
+        /// 生成訂單編號（使用 Guid 片段避免碰撞）
         /// </summary>
         private string GenerateOrderNumber()
         {
             var date = DateTime.Now.ToString("yyyyMMdd");
-            var random = new Random().Next(1000, 9999);
-            return $"ORD{date}{random}";
+            var unique = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+            return $"ORD{date}{unique}";
         }
     }
 }

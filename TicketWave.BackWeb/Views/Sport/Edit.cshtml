@@ -1,0 +1,138 @@
+@model TicketWave.Repository.Entity.Sport
+
+@{
+    ViewData["Title"] = "編輯體育賽事";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fa fa-edit me-2"></i> 編輯體育賽事</h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="SportId" />
+                <input type="hidden" asp-for="TotalSeats" />
+                <input type="hidden" asp-for="AvailableSeats" />
+                <input type="hidden" asp-for="CreateDate" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="SportName" class="form-label">賽事名稱 <span class="text-danger">*</span></label>
+                        <input asp-for="SportName" class="form-control" />
+                        <span asp-validation-for="SportName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="SportType" class="form-label">運動類型 <span class="text-danger">*</span></label>
+                        <input asp-for="SportType" class="form-control" />
+                        <span asp-validation-for="SportType" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="HomeTeam" class="form-label">主場隊伍 <span class="text-danger">*</span></label>
+                        <input asp-for="HomeTeam" class="form-control" />
+                        <span asp-validation-for="HomeTeam" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="AwayTeam" class="form-label">客場隊伍 <span class="text-danger">*</span></label>
+                        <input asp-for="AwayTeam" class="form-control" />
+                        <span asp-validation-for="AwayTeam" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="League" class="form-label">聯賽名稱</label>
+                        <input asp-for="League" class="form-control" />
+                        <span asp-validation-for="League" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Season" class="form-label">賽季</label>
+                        <input asp-for="Season" class="form-control" />
+                        <span asp-validation-for="Season" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="PerformanceDate" class="form-label">比賽日期時間 <span class="text-danger">*</span></label>
+                        <input asp-for="PerformanceDate" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="PerformanceDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">座位資訊</label>
+                        <input type="text" class="form-control" value="總座位: @Model.TotalSeats / 剩餘: @Model.AvailableSeats" readonly />
+                        <small class="text-muted">座位數量請勿修改，以免影響訂單資料</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="VenueName" class="form-label">場館名稱 <span class="text-danger">*</span></label>
+                        <input asp-for="VenueName" class="form-control" />
+                        <span asp-validation-for="VenueName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="VenueAddress" class="form-label">場館地址</label>
+                        <input asp-for="VenueAddress" class="form-control" />
+                        <span asp-validation-for="VenueAddress" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="SaleStartDate" class="form-label">開始售票時間 <span class="text-danger">*</span></label>
+                        <input asp-for="SaleStartDate" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="SaleStartDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="SaleEndDate" class="form-label">結束售票時間 <span class="text-danger">*</span></label>
+                        <input asp-for="SaleEndDate" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="SaleEndDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="Status" class="form-label">賽事狀態 <span class="text-danger">*</span></label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="0">未開賣</option>
+                            <option value="1">售票中</option>
+                            <option value="2">已售罄</option>
+                            <option value="3">已結束</option>
+                            <option value="4">已取消</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="Description" class="form-label">賽事描述</label>
+                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="PosterImageUrl" class="form-label">海報圖片 URL</label>
+                        <input asp-for="PosterImageUrl" class="form-control" />
+                        <span asp-validation-for="PosterImageUrl" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> 儲存變更
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fa fa-times"></i> 取消
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

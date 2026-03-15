@@ -14,16 +14,16 @@ using TicketWave.Web.Models;
 
 namespace TicketWave.Web.Controllers
 {
-    public class ConcertController : Controller
+    public class SportController : Controller
     {
         private readonly TicketWaveContext _dbContext;
         private readonly IOrderService _orderService;
-        private readonly ILogger<ConcertController> _logger;
+        private readonly ILogger<SportController> _logger;
 
-        public ConcertController(
+        public SportController(
             TicketWaveContext dbContext,
             IOrderService orderService,
-            ILogger<ConcertController> logger)
+            ILogger<SportController> logger)
         {
             _dbContext = dbContext;
             _orderService = orderService;
@@ -32,21 +32,22 @@ namespace TicketWave.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var concerts = await _dbContext.Concerts
+            var sports = await _dbContext.Sports
                 .Where(c => c.Status == 1)
-                .OrderBy(c => c.PerformanceDate)
+                .OrderBy(c => c.DisplayOrder)
+                //.OrderBy(c => c.PerformanceDate)
                 .ToListAsync();
 
-            return View(concerts);
+            return View(sports);
         }
 
         public async Task<IActionResult> Details(Guid id)
         {
-            var concert = await _dbContext.Concerts.FindAsync(id);
-            if (concert == null) return NotFound();
+            var sport = await _dbContext.Sports.FindAsync(id);
+            if (sport == null) return NotFound();
 
             var seatZones = await _dbContext.Seats
-                .Where(s => s.ConcertId == id)
+                .Where(s => s.SportId == id)
                 .GroupBy(s => s.SeatZone)
                 .Select(g => new
                 {
@@ -59,11 +60,11 @@ namespace TicketWave.Web.Controllers
                 .ToListAsync();
 
             ViewBag.SeatZones = seatZones;
-            return View(concert);
+            return View(sport);
         }
 
         [HttpGet]
-        public async Task<IActionResult> SelectZone(Guid concertId)
+        public async Task<IActionResult> SelectZone(Guid sportId)
         {
             try
             {
@@ -74,15 +75,15 @@ namespace TicketWave.Web.Controllers
                     return RedirectToAction("Login", "Member");
                 }
 
-                var concert = await _dbContext.Concerts.FindAsync(concertId);
-                if (concert == null)
+                var sport = await _dbContext.Sports.FindAsync(sportId);
+                if (sport == null)
                 {
-                    TempData["ErrorMessage"] = "找不到此演唱會";
+                    TempData["ErrorMessage"] = "找不到此運動賽事";
                     return RedirectToAction("Index");
                 }
 
                 var zoneStats = await _dbContext.Seats
-                    .Where(s => s.ConcertId == concertId)
+                    .Where(s => s.SportId == sportId)
                     .GroupBy(s => s.SeatZone)
                     .Select(g => new ZoneViewModel
                     {
@@ -95,7 +96,7 @@ namespace TicketWave.Web.Controllers
                     })
                     .ToListAsync();
 
-                ViewBag.Concert = concert;
+                ViewBag.Sport = sport;
                 return View(zoneStats);
             }
             catch (Exception ex)
@@ -107,7 +108,7 @@ namespace TicketWave.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SelectQuantity(Guid concertId, string zone)
+        public async Task<IActionResult> SelectQuantity(Guid sportId, string zone)
         {
             try
             {
@@ -119,25 +120,25 @@ namespace TicketWave.Web.Controllers
                 }
 
                 var memberId = Guid.Parse(memberIdStr);
-                var concert = await _dbContext.Concerts.FindAsync(concertId);
-                if (concert == null)
+                var sport = await _dbContext.Sports.FindAsync(sportId);
+                if (sport == null)
                 {
-                    TempData["ErrorMessage"] = "找不到此演唱會";
+                    TempData["ErrorMessage"] = "找不到此運動賽事";
                     return RedirectToAction("Index");
                 }
 
                 // ✅ 修正：改用 GetMemberTicketCountForEvent
-                var currentTicketCount = await _orderService.GetMemberTicketCountForEvent(memberId, concertId, "concert");
+                var currentTicketCount = await _orderService.GetMemberTicketCountForEvent(memberId, sportId, "sport");
                 var remainingQuota = 4 - currentTicketCount;
 
                 if (remainingQuota <= 0)
                 {
-                    TempData["ErrorMessage"] = "您已達到此場演唱會的購票上限（4張）";
-                    return RedirectToAction("SelectZone", new { concertId });
+                    TempData["ErrorMessage"] = "您已達到此場運動賽事的購票上限（4張）";
+                    return RedirectToAction("SelectZone", new { sportId });
                 }
 
                 var zoneInfo = await _dbContext.Seats
-                    .Where(s => s.ConcertId == concertId && s.SeatZone == zone)
+                    .Where(s => s.SportId == sportId && s.SeatZone == zone)
                     .GroupBy(s => s.SeatZone)
                     .Select(g => new
                     {
@@ -150,10 +151,10 @@ namespace TicketWave.Web.Controllers
                 if (zoneInfo == null || zoneInfo.AvailableSeats == 0)
                 {
                     TempData["ErrorMessage"] = "此區域已售罄";
-                    return RedirectToAction("SelectZone", new { concertId });
+                    return RedirectToAction("SelectZone", new { sportId });
                 }
 
-                ViewBag.Concert = concert;
+                ViewBag.Sport = sport;
                 ViewBag.Zone = zone;
                 ViewBag.ZoneInfo = zoneInfo;
                 ViewBag.RemainingQuota = remainingQuota;
@@ -165,12 +166,12 @@ namespace TicketWave.Web.Controllers
             {
                 _logger.LogError(ex, "載入數量選擇頁面失敗");
                 TempData["ErrorMessage"] = "載入頁面時發生錯誤";
-                return RedirectToAction("SelectZone", new { concertId });
+                return RedirectToAction("SelectZone", new { sportId });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> VerifyCaptcha(Guid concertId, string zone, int quantity, string captchaInput, bool autoSelect = false)
+        public async Task<IActionResult> VerifyCaptcha(Guid sportId, string zone, int quantity, string captchaInput, bool autoSelect = false)
         {
             try
             {
@@ -180,7 +181,7 @@ namespace TicketWave.Web.Controllers
                     !sessionCaptcha.Equals(captchaInput, StringComparison.OrdinalIgnoreCase))
                 {
                     TempData["ErrorMessage"] = "驗證碼錯誤，請重新輸入";
-                    return RedirectToAction("SelectQuantity", new { concertId, zone });
+                    return RedirectToAction("SelectQuantity", new { sportId, zone });
                 }
 
                 HttpContext.Session.SetString("SelectedZone", zone);
@@ -190,19 +191,19 @@ namespace TicketWave.Web.Controllers
                 _logger.LogInformation($"驗證碼驗證成功，區域：{zone}，數量：{quantity}，自動選位：{autoSelect}");
 
                 if (autoSelect)
-                    return await AutoSelectSeats(concertId, zone, quantity);
+                    return await AutoSelectSeats(sportId, zone, quantity);
 
-                return RedirectToAction("SelectSeats", new { concertId, zone, quantity });
+                return RedirectToAction("SelectSeats", new { sportId, zone, quantity });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "驗證碼驗證失敗");
                 TempData["ErrorMessage"] = "驗證失敗，請重試";
-                return RedirectToAction("SelectQuantity", new { concertId, zone });
+                return RedirectToAction("SelectQuantity", new { sportId, zone });
             }
         }
 
-        private async Task<IActionResult> AutoSelectSeats(Guid concertId, string zone, int quantity)
+        private async Task<IActionResult> AutoSelectSeats(Guid sportId, string zone, int quantity)
         {
             try
             {
@@ -216,13 +217,13 @@ namespace TicketWave.Web.Controllers
                 var memberId = Guid.Parse(memberIdStr);
 
                 var availableSeats = await _dbContext.Seats
-                    .Where(s => s.ConcertId == concertId && s.SeatZone == zone && s.SeatStatus == 0)
+                    .Where(s => s.SportId == sportId && s.SeatZone == zone && s.SeatStatus == 0)
                     .ToListAsync();
 
                 if (availableSeats.Count < quantity)
                 {
                     TempData["ErrorMessage"] = $"此區域可用座位不足（剩餘 {availableSeats.Count} 個）";
-                    return RedirectToAction("SelectQuantity", new { concertId, zone });
+                    return RedirectToAction("SelectQuantity", new { sportId, zone });
                 }
 
                 var selectedSeats = SmartSeatSelection(availableSeats, quantity);
@@ -230,13 +231,13 @@ namespace TicketWave.Web.Controllers
                 if (selectedSeats == null || selectedSeats.Count != quantity)
                 {
                     TempData["ErrorMessage"] = "系統選位失敗，請手動選位";
-                    return RedirectToAction("SelectSeats", new { concertId, zone, quantity });
+                    return RedirectToAction("SelectSeats", new { sportId, zone, quantity });
                 }
 
                 var seatIds = selectedSeats.Select(s => s.SeatId).ToList();
 
-                // ✅ 修正：改用 CreateConcertOrder
-                var result = await _orderService.CreateConcertOrder(memberId, concertId, seatIds);
+                // ✅ 修正：改用 CreateSportOrder
+                var result = await _orderService.CreateSportOrder(memberId, sportId, seatIds);
 
                 if (result.Success)
                 {
@@ -253,14 +254,14 @@ namespace TicketWave.Web.Controllers
                 {
                     _logger.LogWarning($"自動選位訂單建立失敗：{result.Message}");
                     TempData["ErrorMessage"] = result.Message;
-                    return RedirectToAction("SelectQuantity", new { concertId, zone });
+                    return RedirectToAction("SelectQuantity", new { sportId, zone });
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "自動選位失敗");
                 TempData["ErrorMessage"] = "自動選位失敗，請重試";
-                return RedirectToAction("SelectQuantity", new { concertId, zone });
+                return RedirectToAction("SelectQuantity", new { sportId, zone });
             }
         }
 
@@ -394,7 +395,7 @@ namespace TicketWave.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SelectSeats(Guid concertId, string? zone = null, int? quantity = null)
+        public async Task<IActionResult> SelectSeats(Guid sportId, string? zone = null, int? quantity = null)
         {
             try
             {
@@ -412,28 +413,28 @@ namespace TicketWave.Web.Controllers
                 if (string.IsNullOrEmpty(sessionZone) || !sessionQuantity.HasValue)
                 {
                     TempData["ErrorMessage"] = "請重新選擇區域和張數";
-                    return RedirectToAction("SelectZone", new { concertId });
+                    return RedirectToAction("SelectZone", new { sportId });
                 }
 
-                var concert = await _dbContext.Concerts.FindAsync(concertId);
-                if (concert == null)
+                var sport = await _dbContext.Sports.FindAsync(sportId);
+                if (sport == null)
                 {
-                    TempData["ErrorMessage"] = "找不到此演唱會";
+                    TempData["ErrorMessage"] = "找不到此運動賽事";
                     return RedirectToAction("Index");
                 }
 
                 // ✅ 修正：改用 GetMemberTicketCountForEvent
-                var currentTicketCount = await _orderService.GetMemberTicketCountForEvent(memberId, concertId, "concert");
+                var currentTicketCount = await _orderService.GetMemberTicketCountForEvent(memberId, sportId, "sport");
                 var remainingQuota = 4 - currentTicketCount;
 
-                ViewBag.Concert = concert;
+                ViewBag.Sport = sport;
                 ViewBag.CurrentTicketCount = currentTicketCount;
                 ViewBag.RemainingQuota = remainingQuota;
                 ViewBag.SelectedZone = sessionZone;
                 ViewBag.SelectedQuantity = sessionQuantity;
 
                 var seatsQuery = await _dbContext.Seats
-                    .Where(s => s.ConcertId == concertId && s.SeatZone == sessionZone)
+                    .Where(s => s.SportId == sportId && s.SeatZone == sessionZone)
                     .ToListAsync();
 
                 var seats = seatsQuery
@@ -445,7 +446,7 @@ namespace TicketWave.Web.Controllers
 
                 var memberSeatIds = await _dbContext.OrderDetails
                     .Where(od => od.Order.MemberId == memberId
-                              && od.Order.ConcertId == concertId
+                              && od.Order.SportId == sportId
                               && od.Order.OrderStatus != 2)
                     .Join(_dbContext.Seats,
                           od => od.OrderDetailId,
@@ -460,12 +461,12 @@ namespace TicketWave.Web.Controllers
             {
                 _logger.LogError(ex, "選座頁面載入失敗");
                 TempData["ErrorMessage"] = "載入頁面時發生錯誤";
-                return RedirectToAction("SelectZone", new { concertId });
+                return RedirectToAction("SelectZone", new { sportId });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] ConcertOrderRequest request)
+        public async Task<IActionResult> CreateOrder([FromBody] SportOrderRequest request)
         {
             try
             {
@@ -485,8 +486,8 @@ namespace TicketWave.Web.Controllers
                 if (request.SelectedSeats.Count > 4)
                     return Json(new { success = false, message = "一次最多只能選擇 4 個座位" });
 
-                // ✅ 修正：改用 CreateConcertOrder
-                var result = await _orderService.CreateConcertOrder(memberId, request.ConcertId, request.SelectedSeats);
+                // ✅ 修正：改用 CreateSportOrder
+                var result = await _orderService.CreateSportOrder(memberId, request.SportId, request.SelectedSeats);
 
                 if (result.Success)
                 {
@@ -505,11 +506,11 @@ namespace TicketWave.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CheckSeatStatus(Guid concertId, string? zone = null)
+        public async Task<IActionResult> CheckSeatStatus(Guid sportId, string? zone = null)
         {
             try
             {
-                var query = _dbContext.Seats.Where(s => s.ConcertId == concertId);
+                var query = _dbContext.Seats.Where(s => s.SportId == sportId);
                 if (!string.IsNullOrEmpty(zone))
                     query = query.Where(s => s.SeatZone == zone);
 
@@ -535,10 +536,10 @@ namespace TicketWave.Web.Controllers
         }
     }
 
-    // 修正：改名避免與 SportController 的同名類別衝突
-    public class ConcertOrderRequest
+    // 修正：改名避免與 ConcertController 的同名類別衝突
+    public class SportOrderRequest
     {
-        public Guid ConcertId { get; set; }
+        public Guid SportId { get; set; }
         public List<Guid> SelectedSeats { get; set; }
     }
 }

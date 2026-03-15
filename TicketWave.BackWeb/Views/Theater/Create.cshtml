@@ -1,0 +1,133 @@
+@model TicketWave.Repository.Entity.Theater
+
+@{
+    ViewData["Title"] = "新增表演藝術";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fa fa-plus me-2"></i> 新增表演藝術</h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="TheaterName" class="form-label">表演名稱 <span class="text-danger">*</span></label>
+                        <input asp-for="TheaterName" class="form-control" placeholder="例如：歌劇魅影 台中場" />
+                        <span asp-validation-for="TheaterName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="TheaterType" class="form-label">表演類型 <span class="text-danger">*</span></label>
+                        <input asp-for="TheaterType" class="form-control" placeholder="例如：音樂劇、話劇、舞蹈" />
+                        <span asp-validation-for="TheaterType" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Director" class="form-label">導演</label>
+                        <input asp-for="Director" class="form-control" placeholder="例如：Andrew Lloyd Webber" />
+                        <span asp-validation-for="Director" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Duration" class="form-label">演出時長（分鐘）</label>
+                        <input asp-for="Duration" type="number" class="form-control" min="1" placeholder="例如：150" />
+                        <span asp-validation-for="Duration" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Language" class="form-label">語言</label>
+                        <input asp-for="Language" class="form-control" placeholder="例如：中文、英文、法文" />
+                        <span asp-validation-for="Language" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="AgeRating" class="form-label">年齡分級</label>
+                        <input asp-for="AgeRating" class="form-control" placeholder="例如：普、保護級、輔導級" />
+                        <span asp-validation-for="AgeRating" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="PerformanceDate" class="form-label">演出日期時間 <span class="text-danger">*</span></label>
+                        <input asp-for="PerformanceDate" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="PerformanceDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="TotalSeats" class="form-label">總座位數 <span class="text-danger">*</span></label>
+                        <input asp-for="TotalSeats" type="number" class="form-control" min="1" placeholder="例如：500" />
+                        <span asp-validation-for="TotalSeats" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="VenueName" class="form-label">場館名稱 <span class="text-danger">*</span></label>
+                        <input asp-for="VenueName" class="form-control" placeholder="例如：臺中國家歌劇院大劇院" />
+                        <span asp-validation-for="VenueName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="VenueAddress" class="form-label">場館地址</label>
+                        <input asp-for="VenueAddress" class="form-control" placeholder="例如：台中市西屯區惠來路二段101號" />
+                        <span asp-validation-for="VenueAddress" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="SaleStartDate" class="form-label">開始售票時間 <span class="text-danger">*</span></label>
+                        <input asp-for="SaleStartDate" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="SaleStartDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="SaleEndDate" class="form-label">結束售票時間 <span class="text-danger">*</span></label>
+                        <input asp-for="SaleEndDate" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="SaleEndDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="Status" class="form-label">表演狀態 <span class="text-danger">*</span></label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="0">未開賣</option>
+                            <option value="1" selected>售票中</option>
+                            <option value="2">已售罄</option>
+                            <option value="3">已結束</option>
+                            <option value="4">已取消</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="Description" class="form-label">表演描述</label>
+                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="表演的詳細說明..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="PosterImageUrl" class="form-label">海報圖片 URL</label>
+                        <input asp-for="PosterImageUrl" class="form-control" placeholder="https://..." />
+                        <span asp-validation-for="PosterImageUrl" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> 儲存
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fa fa-times"></i> 取消
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

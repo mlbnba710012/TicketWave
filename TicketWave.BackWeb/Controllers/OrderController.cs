@@ -16,13 +16,10 @@ namespace TicketWave.BackWeb.Controllers
         }
 
         // GET: Order/Index
-        public async Task<IActionResult> Index(string searchTerm = "", int? status = null)
+        public async Task<IActionResult> Index(string searchTerm = "", int? status = null, string eventType = "")
         {
-            // 檢查登入
             if (string.IsNullOrEmpty(HttpContext.Session.GetString("AdminUsername")))
-            {
                 return RedirectToAction("Login", "Account");
-            }
 
             try
             {
@@ -30,18 +27,30 @@ namespace TicketWave.BackWeb.Controllers
                     .Include(o => o.Member)
                     .AsQueryable();
 
-                // 搜尋功能
+                // 關鍵字搜尋（訂單編號、會員姓名、Email）
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
                     ordersQuery = ordersQuery.Where(o =>
-                        o.OrderId.ToString().Contains(searchTerm) ||
+                        o.OrderNumber.Contains(searchTerm) ||
                         o.Member.Name.Contains(searchTerm) ||
-                        o.Member.Email.Contains(searchTerm)
-                    );
+                        o.Member.Email.Contains(searchTerm));
                     ViewBag.SearchTerm = searchTerm;
                 }
 
-                // 狀態篩選
+                // 活動類型篩選
+                if (!string.IsNullOrEmpty(eventType))
+                {
+                    ordersQuery = eventType switch
+                    {
+                        "concert" => ordersQuery.Where(o => o.ConcertId != null),
+                        "sport" => ordersQuery.Where(o => o.SportId != null),
+                        "theater" => ordersQuery.Where(o => o.TheaterId != null),
+                        _ => ordersQuery
+                    };
+                    ViewBag.SelectedEventType = eventType;
+                }
+
+                // 訂單狀態篩選
                 if (status.HasValue)
                 {
                     ordersQuery = ordersQuery.Where(o => o.OrderStatus == status.Value);
@@ -66,17 +75,13 @@ namespace TicketWave.BackWeb.Controllers
         public async Task<IActionResult> Details(Guid id)
         {
             if (string.IsNullOrEmpty(HttpContext.Session.GetString("AdminUsername")))
-            {
                 return RedirectToAction("Login", "Account");
-            }
 
             try
             {
                 var order = await _dbContext.Orders
                     .Include(o => o.Member)
                     .Include(o => o.OrderDetails)
-                        //.ThenInclude(od => od.Seat)
-                            //.ThenInclude(s => s.Concert)
                     .FirstOrDefaultAsync(o => o.OrderId == id);
 
                 if (order == null)
@@ -85,17 +90,20 @@ namespace TicketWave.BackWeb.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // 手動查詢座位資訊
+                // 查詢每筆 OrderDetail 對應的座位資訊
+                var seatDict = new Dictionary<Guid, Seat>();
                 foreach (var detail in order.OrderDetails)
                 {
-                    // 透過 OrderDetailId 反查座位
                     var seat = await _dbContext.Seats
                         .Include(s => s.Concert)
+                        .Include(s => s.Sport)
+                        .Include(s => s.Theater)
                         .FirstOrDefaultAsync(s => s.OrderDetailId == detail.OrderDetailId);
 
-                    // 暫存在 ViewBag 或建立 ViewModel
-                    // ViewBag.Seats 或使用字典存儲
+                    if (seat != null)
+                        seatDict[detail.OrderDetailId] = seat;
                 }
+                ViewBag.SeatDict = seatDict;
 
                 return View(order);
             }
@@ -108,4 +116,3 @@ namespace TicketWave.BackWeb.Controllers
         }
     }
 }
-

@@ -21,10 +21,16 @@ public partial class Order
 
     public Guid MemberId { get; set; }
 
-    public Guid ConcertId { get; set; }
+    public Guid? ConcertId { get; set; }
+    public Guid? SportId { get; set; }
+    public Guid? TheaterId { get; set; }
 
+    //[StringLength(200)]
+    //public string ConcertName { get; set; }
+
+    //Concert、Sport、Theater三種活動共用EventName欄位，方便查詢和顯示
     [StringLength(200)]
-    public string ConcertName { get; set; }
+    public string EventName { get; set; }
 
     [Column(TypeName = "decimal(10, 2)")]
     public decimal TotalAmount { get; set; }
